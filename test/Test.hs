@@ -1,8 +1,10 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE MonoLocalBinds #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -30,6 +32,12 @@ import           Test.Tasty.Checklist
 import           Test.Tasty.Hspec
 import           Test.Tasty.Runners.AntXML
 
+#ifdef VERSION_aeson
+import           Data.Aeson
+import           Data.ByteString.Lazy ( ByteString )
+import           Data.Name.JSON
+#endif
+
 
 main :: IO ()
 main = tests >>= defaultMainWithIngredients (antXMLRunner : defaultIngredients)
@@ -46,6 +54,9 @@ tests = testGroup "Named" <$> sequence
         , testSomeNames
         , testHasName
         , testUtilities
+#ifdef VERSION_aeson
+        , testJSON
+#endif
         ]
 
 
@@ -485,12 +496,13 @@ testHasName = testSpec "HasName" $ do
 
 data Foo = Foo (Name "prefix") (Name "principle")
                (Map.HashMap (Name "alt-key") (Name "alt"))
-         deriving Generic
+         deriving (Eq, Generic, Show)
 instance HasName Foo UTF8 "principle" where myName (Foo _ p _) = p
 
 data Bar = Bar (Name "first") (Named Secure "second")
 instance HasName Bar Secure "second" where myName (Bar _ s) = s
 
+instance TestShow Foo
 
 testUtilities :: IO TestTree
 testUtilities = testSpec "Named utilities" $ do
@@ -524,3 +536,160 @@ testUtilities = testSpec "Named utilities" $ do
 
     it "CR88 can check a non-null Secure named" $
       nullName ("Not empty" :: Named Secure "CR88") `shouldBe` False
+
+----------------------------------------------------------------------
+-- Data.Name.JSON
+
+#ifdef VERSION_aeson
+
+instance TestShow (Proxy JSONStyle) where testShow _ = "Proxy :: \"JSONStyle\""
+
+testJSON :: IO TestTree
+testJSON = testSpec "Named JSON style" $ do
+  describe "Named JSON" $ do
+
+    it "CR90 can create a JSON Named from Text" $
+      withChecklist "CR90" $
+      fromText @(Named JSONStyle "CR90") ("test JSON text" :: Text)
+      `checkValues`
+      (Empty
+       :> Val "overloaded equivalent text value" id "test JSON text"
+       :> Got "case sensitive text value" (/= "Test json Text")
+       :> Val "name parameter value" (\n -> nameOf n proxy#) "CR90"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy JSONStyle)
+       :> Val "extracted text" nameText ("test JSON text" :: Text)
+      )
+
+    it "CR91 render UTF8 via Sayable" $
+      withChecklist "CR91" $
+      ("test JSON thing" :: Named JSONStyle "CR91")
+      `checkValues`
+      (Empty
+       :> Val "as sayable" (sez @"test") "CR91 'test JSON thing'"
+       :> Val "as sayable info" (sez @"info") "test JSON thing"
+      )
+
+    it "CR92 render UTF8 via Prettyprinter" $
+      withChecklist "CR92" $
+      fromText @(Named JSONStyle "CR92") ("test of JSON text" :: Text)
+      `checkValues`
+      (Empty
+       :> Val "as pretty" (show . PP.pretty) "CR92 'test of JSON text'"
+      )
+
+    it "CR93 render UTF8 via Show" $
+      withChecklist "CR93" $
+      fromText @(Named JSONStyle "CR93") ("test of text" :: Text)
+      `checkValues`
+      (Empty
+       :> Val "as show" show "CR93 'test of text'"
+      )
+
+    it "CR94 JSON semigroup" $
+      withChecklist "CR94" $
+      (fromText @(Named JSONStyle "CR94") ("more test JSON text" :: Text) <> "!!")
+      `checkValues`
+      (Empty
+       :> Val "raw value" id "more test JSON text!!"
+       :> Val "as sayable" (sez @"test") "CR94 'more test JSON text!!'"
+      )
+
+    it "CR95 JSON default conversion" $
+      withChecklist "CR95" $
+      (convertName (fromText "some JSON text" :: Named JSONStyle "CR95")
+       :: Named JSONStyle "CR95 2")
+      `checkValues`
+      (Empty
+       :> Val "matches implicit construction" id "some JSON text"
+       :> Val "as sayable" (sez @"test") "CR95 2 'some JSON text'"
+       :> Val "as extracted text" nameText "some JSON text"
+      )
+
+    it "CR96 UTF8->JSON default conversion" $
+      withChecklist "CR96" $
+      (convertStyle (fromText "Some JSON-able TEXT" :: Name "CR96")
+        :: Named JSONStyle "CR96")
+      `checkValues`
+      (Empty
+       :> Val "matches implicit construction" id "Some JSON-able TEXT"
+       :> Val "as sayable" (sez @"test") "CR96 'Some JSON-able TEXT'"
+       :> Val "as extracted text" nameText "Some JSON-able TEXT"
+      )
+
+    it "CR97 JSON->UTF8 default conversion" $
+      withChecklist "CR97" $
+      (convertStyle (fromText "Some un-JSON-able TEXT" :: Named JSONStyle "CR97")
+        :: Name "CR97")
+      `checkValues`
+      (Empty
+       :> Val "matches implicit construction" id "Some un-JSON-able TEXT"
+       :> Val "as sayable" (sez @"test") "CR97 'Some un-JSON-able TEXT'"
+       :> Val "as extracted text" nameText "Some un-JSON-able TEXT"
+      )
+
+    it "CR98 can get a JSON length" $
+      nameLength ("Length of JSON TEXT" :: Named JSONStyle "CR98") `shouldBe` 19
+
+    it "CR99 can check a null JSON Named" $
+      nullName ("" :: Named JSONStyle "CR99") `shouldBe` True
+
+    it "CR100 can check a non-null JSON Named" $
+      nullName ("*" :: Named JSONStyle "CR99") `shouldBe` False
+
+    it "CR101 Named toJSON is valid" $
+      withChecklist "CR101" $
+      let obj = convertStyle ("Regular TEXT!" :: Name "CR101")
+                :: Named JSONStyle "CR101"
+      in encode (toJSON obj)
+         `checkValues`
+         (Empty
+          :> Val "encoded" id "\"Regular TEXT!\""
+          :> Val "decoded" decode (Just obj)
+         )
+
+    it "CR102 toJSON of structure containing Named is valid" $
+      withChecklist "CR102" $
+      let obj = Foo "start" "your engines"
+                (Map.fromList [ ("one","ready")
+                              , ("two", "set")
+                              , ("three", "go")
+                              ])
+      in encode (toJSON obj)
+         `checkValues`
+         (Empty
+          :> Val "encoded" id
+          "[\"start\",\"your engines\",{\"one\":\"ready\",\"three\":\"go\",\"two\":\"set\"}]"
+          :> Val "decoded" decode (Just obj)
+         )
+
+    it "CR103 toJSON of record containing Named is valid" $
+      withChecklist "CR103" $
+      let obj = Info "John Henry" "railroad worker" "hammer master"
+      in encode (toJSON obj)
+         `checkValues`
+         (Empty
+          :> Val "encoded" id
+          "{\"desc\":\"hammer master\",\"name\":\"John Henry\",\"title\":\"railroad worker\"}"
+          :> Val "decoded" decode (Just obj)
+         )
+
+data Info = Info { name :: Name "name"
+                 , title :: Name "title"
+                 , desc :: Name "description"
+                 }
+  deriving (Eq, Generic, Show)
+instance ToJSON Info
+instance FromJSON Info
+
+instance ToJSON Foo
+instance FromJSON Foo
+
+instance ConvertName JSONStyle "CR95" "CR95 2"
+
+instance TestShow ByteString
+instance TestShow a => TestShow (Maybe a) where
+  testShow = \case
+    Nothing -> "NOTHING"
+    Just a -> "JUST " <> testShow a
+instance TestShow Info
+#endif

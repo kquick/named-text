@@ -1,4 +1,6 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MagicHash #-}
@@ -10,6 +12,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
+import qualified Data.HashMap.Strict as Map
 import           Data.Name
 import           Data.Parameterized.Context ( pattern Empty, pattern (:>) )
 import           Data.Proxy ( Proxy(Proxy) )
@@ -17,6 +20,7 @@ import           Data.String ( IsString(fromString) )
 import           Data.Text ( Text )
 import qualified Data.Text as T
 import           GHC.Exts ( proxy#, IsList(fromList, toList) )
+import           GHC.Generics ( Generic )
 import qualified Prettyprinter as PP
 import           Text.Sayable
 
@@ -473,12 +477,15 @@ testHasName = testSpec "HasName" $ do
   describe "HasName Foo" $ do
 
     it "CR70 can extract UTF8 myName from Foo" $
-      myName (Foo "bar" "baz" "quux") `shouldBe` ("baz" :: Name "principle")
+      myName (Foo "bar" "baz" (Map.fromList [("one","quux"), ("two","brox")]))
+      `shouldBe` ("baz" :: Name "principle")
 
     it "CR71 can extract secure myName from Bar" $
       myName (Bar "baz" "quux") `shouldBe` ("quux" :: Named Secure "second")
 
-data Foo = Foo (Name "prefix") (Name "principle") (Name "alt")
+data Foo = Foo (Name "prefix") (Name "principle")
+               (Map.HashMap (Name "alt-key") (Name "alt"))
+         deriving Generic
 instance HasName Foo UTF8 "principle" where myName (Foo _ p _) = p
 
 data Bar = Bar (Name "first") (Named Secure "second")

@@ -1,5 +1,16 @@
 # Revision history for named-text
 
+## 1.1.0.0 -- 2022-12-28
+
+* Added tests and enhanced haddock.
+* Re-organized implementation, removing extraneous definitions.
+* The `name` and `caselessName` functions are deprecated in favor of `nameText`.
+* General, overlappable `Prettyprinter` `Pretty` instance for all `Named`.
+* Changed from `Named style sym` to `Named style nameOf`.
+* Fixed `convertStyle` to use the proper `fromText` instance.
+* Added `NameText` constraint to `viewSomeNameStyle` first argument signature.
+* Added `nameLength` and `nullName` utility functions.
+
 ## 1.0.1.0 -- 2022-12-23
 
 * Specific GHC support range for GHC 8.8--9.4

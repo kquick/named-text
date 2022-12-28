@@ -9,6 +9,14 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
+{-|
+
+This module provides a 'JSONStyle' Named style that can be used for JSON
+encoding/decoding.  It also provides conversion to and from that style from the
+regular 'UTF8' style, as well as an "aeson" 'ToJSON' and 'FromJSON' instance.
+
+-}
+
 module Data.Name.JSON where
 
 import Data.Aeson

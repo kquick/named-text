@@ -1,5 +1,12 @@
 # Revision history for named-text
 
+## 1.1.1.0 -- 2022-12-28
+
+* Added optional Data.Name.JSON providing `JSONSchema` with Aeson `ToJSON` and
+  `FromJSON` instances.
+* Additional tests.
+* Added README and updated nix flake.
+
 ## 1.1.0.0 -- 2022-12-28
 
 * Added tests and enhanced haddock.

@@ -56,3 +56,22 @@ library
                     , sayable >= 1.0 && < 1.1
                     , text
     exposed-modules:  Data.Name
+
+
+test-suite namedTests
+    import:           bldspec
+    default-language: Haskell2010
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Test.hs
+    build-depends:    base
+                    , hspec
+                    , named-text
+                    , parameterized-utils >= 2.1 && < 2.2
+                    , prettyprinter
+                    , sayable
+                    , tasty >= 1.4 && < 1.5
+                    , tasty-ant-xml >= 1.1 && < 1.2
+                    , tasty-checklist >= 1.0 && < 1.1
+                    , tasty-hspec >= 1.2 && < 1.3
+                    , text

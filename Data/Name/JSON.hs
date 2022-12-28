@@ -39,6 +39,10 @@ instance NameText JSONStyle
 instance ConvertNameStyle JSONStyle UTF8 nameOf
 instance ConvertNameStyle UTF8 JSONStyle nameOf
 
+instance ConvertNameStyle JSONStyle CaseInsensitive nameOf
+instance ConvertNameStyle CaseInsensitive JSONStyle nameOf
+
+
 -- -- The generic instance results in an object: { "name": "..." } This
 -- -- instance declaration avoids that and causes the JSON form to be a simple
 -- -- string.  Currently there's no FromJSON, although it's likely the generic
@@ -67,3 +71,16 @@ instance FromJSON (Name nameTy) where
 
 instance FromJSONKey (Name nameTy) where
   fromJSONKey = convertStyle @JSONStyle @UTF8 <$> fromJSONKey
+
+
+instance ToJSON (Named CaseInsensitive nameTy) where
+  toJSON = toJSON . convertStyle @CaseInsensitive @JSONStyle
+
+instance ToJSONKey (Named CaseInsensitive nameTy) where
+  toJSONKey = convertStyle @CaseInsensitive @JSONStyle >$< toJSONKey
+
+instance FromJSON (Named CaseInsensitive nameTy) where
+  parseJSON j = convertStyle @JSONStyle @CaseInsensitive . fromString <$> parseJSON j
+
+instance FromJSONKey (Named CaseInsensitive nameTy) where
+  fromJSONKey = convertStyle @JSONStyle @CaseInsensitive <$> fromJSONKey

@@ -693,8 +693,19 @@ testJSON = testSpec "Named JSON style" $ do
           :> Val "decoded" decode (Just obj)
          )
 
+    it "CR104 JSON of record containing CaseInsensitive Named is not necessarily round-robin" $
+      withChecklist "CR104" $
+      let obj = Info "John Henry" "Railroad Worker" "Hammer Master"
+      in encode (toJSON obj)
+         `checkValues`
+         (Empty
+          :> Val "encoded" id
+          "{\"desc\":\"Hammer Master\",\"name\":\"John Henry\",\"title\":\"railroad worker\"}"
+          :> Val "decoded" decode (Just $ obj { title = fromText $ T.toLower $ nameText $ title obj })
+         )
+
 data Info = Info { name :: Name "name"
-                 , title :: Name "title"
+                 , title :: Named CaseInsensitive "title"
                  , desc :: Name "description"
                  }
   deriving (Eq, Generic, Show)

@@ -52,7 +52,8 @@
       "inputs": {
         "levers": "levers",
         "nixpkgs": "nixpkgs",
-        "sayable": "sayable"
+        "sayable": "sayable",
+        "tasty-hspec-src": "tasty-hspec-src"
       }
     },
     "sayable": {
@@ -74,6 +75,22 @@
       "original": {
         "path": "/home/kquick/Projects/sayable/sayable-2211",
         "type": "path"
+      }
+    },
+    "tasty-hspec-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1660516440,
+        "narHash": "sha256-iAVQUTXgjZ76ZaVOd+9PP/ja5LeyivpGzG9eaXwPAu8=",
+        "owner": "mitchellwrosen",
+        "repo": "tasty-hspec",
+        "rev": "89bcda390f1ed24a06602d0e50a23e57f137ad9d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mitchellwrosen",
+        "repo": "tasty-hspec",
+        "type": "github"
       }
     }
   },

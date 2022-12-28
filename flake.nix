@@ -14,9 +14,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.levers.follows = "levers";
     };
+    tasty-hspec-src = {
+      url = "github:mitchellwrosen/tasty-hspec";
+      flake = false;
+    };
   };
 
-  outputs = { self, levers, nixpkgs, sayable }:
+  outputs = { self, levers, nixpkgs
+            , tasty-hspec-src
+            , sayable }:
     let
       shellWith = pkgs: adds: drv: drv.overrideAttrs(old:
         { buildInputs = old.buildInputs ++ adds pkgs; });
@@ -34,7 +40,7 @@
       devShell = levers.eachSystem (s:
         let pkgs = import nixpkgs { system=s; };
         in shellWith pkgs shellPkgs
-          (defaultPackage.${s}.env.overrideAttrs (a:
+          (self.packages.${s}.named-text_tests.default.env.overrideAttrs (a:
             {
               # Set envvars here
             }
@@ -63,12 +69,17 @@
         let
           mkHaskell = levers.mkHaskellPkg {
             inherit nixpkgs system;
-            ghcver = [ "ghc8107" ];
+            # ghcver = [ "ghc8107" ];
             };
           pkgs = import nixpkgs { inherit system; };
           haskellAdj = drv:
             with (pkgs.haskell).lib;
-            dontHaddock (dontCheck (dontBenchmark (disableLibraryProfiling (disableExecutableProfiling drv))));
+            dontHaddock (
+              dontCheck (
+                dontBenchmark (
+                  disableLibraryProfiling (
+                    disableExecutableProfiling
+                      drv))));
         in rec {
           ghc = pkgs.haskell.compiler.ghc8107;
           named-text = mkHaskell "named-text" self {
@@ -78,11 +89,15 @@
                 haskellAdj drv;
             };
           named-text_tests = mkHaskell "named-text_tests" self {
-            inherit sayable;
+            inherit sayable tasty-hspec;
             adjustDrv = args:
               drv:
-                pkgs.haskell.lib.doBenchmark (pkgs.haskell.lib.doCheck (haskellAdj drv));
-            };
+              pkgs.haskell.lib.doBenchmark
+                (pkgs.haskell.lib.doCheck
+                  (haskellAdj drv)
+                );
+          };
+          tasty-hspec = mkHaskell "tasty-hspec" tasty-hspec-src {};
         });
     };
 }

@@ -41,6 +41,7 @@ tests = testGroup "Named" <$> sequence
         , testValidNames
         , testSomeNames
         , testHasName
+        , testUtilities
         ]
 
 
@@ -482,3 +483,37 @@ instance HasName Foo UTF8 "principle" where myName (Foo _ p _) = p
 
 data Bar = Bar (Name "first") (Named Secure "second")
 instance HasName Bar Secure "second" where myName (Bar _ s) = s
+
+
+testUtilities :: IO TestTree
+testUtilities = testSpec "Named utilities" $ do
+  describe "Named length" $ do
+
+    it "CR80 can get a UTF8 length" $
+      nameLength ("Length of TEXT" :: Name "CR80") `shouldBe` 14
+
+    it "CR81 can get a CaseInsensitive length" $
+      nameLength ("Length of TEXT" :: Named CaseInsensitive "CR81") `shouldBe` 14
+
+    it "CR82 can get a Secure length" $
+      nameLength ("Length of secure TEXT" :: Named Secure "CR82") `shouldBe` 21
+
+  describe "Named null check" $ do
+
+    it "CR83 can check a null UTF8" $
+      nullName ("" :: Name "CR83") `shouldBe` True
+
+    it "CR84 can check a non-null UTF8" $
+      nullName ("Not empty" :: Name "CR84") `shouldBe` False
+
+    it "CR85 can check a null CaseInsensitive named" $
+      nullName ("" :: Named CaseInsensitive "CR85") `shouldBe` True
+
+    it "CR86 can check a non-null CaseInsensitive named" $
+      nullName ("Not empty" :: Named CaseInsensitive "CR86") `shouldBe` False
+
+    it "CR87 can check a null Secure named" $
+      nullName ("" :: Name "CR87") `shouldBe` True
+
+    it "CR88 can check a non-null Secure named" $
+      nullName ("Not empty" :: Named Secure "CR88") `shouldBe` False

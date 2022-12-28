@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-|
@@ -149,6 +150,10 @@ module Data.Name
 
     -- * Constraining allowed names
   , ValidNames, validName
+
+    -- * Utility operations
+  , nameLength
+  , nullName
 )
 where
 
@@ -165,6 +170,9 @@ import           Prettyprinter ( (<+>) )
 import qualified Prettyprinter as PP
 import           Text.Sayable
 
+#if !MIN_VERSION_base(4,16,0)
+import           Numeric.Natural
+#endif
 
 -- | The 'Named' is a wrapper around any 'Data.Text' that identifies the type of
 -- 'Data.Text' via the @nameOf@ phantom symbol type, as well as a usage specified
@@ -318,6 +326,20 @@ instance  {-# OVERLAPPABLE #-} ( KnownSymbol ty
                                => PP.Pretty (Named style ty) where
   pretty nm = (PP.pretty $ nameOf nm proxy#)
               <+> PP.squotes (PP.pretty (nameText nm))
+
+
+----------------------------------------------------------------------
+-- Utility operations
+
+-- | Returns the length of the underlying 'Data.Text'
+
+nameLength :: Named style nm -> Natural
+nameLength = toEnum . T.length . named
+
+-- | Returns true if the name value is empty.
+
+nullName :: Named style nm -> Bool
+nullName = T.null . named
 
 
 ----------------------------------------------------------------------

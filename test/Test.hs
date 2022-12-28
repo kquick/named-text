@@ -311,6 +311,8 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "matches implicit construction" id "list of text"
        :> Val "as sayable" (sez @"test") "CR40-2 'list of text'"
        :> Val "as extracted text" nameText "list of text"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR40-2"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy UTF8)
       )
 
     it "CR41 UTF8 explicit conversion" $
@@ -321,6 +323,8 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "matches implicit construction" id "mjtu!pg!ufyu"
        :> Val "as sayable" (sez @"test") "CR41-3 'mjtu!pg!ufyu'"
        :> Val "as extracted text" nameText "mjtu!pg!ufyu"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR41-3"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy UTF8)
       )
 
     it "CR42 CaseInsensitive conversion" $
@@ -332,6 +336,8 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "matches implicit construction" id "bit of text"
        :> Val "as sayable" (sez @"test") "CR42 new «bit of text»"
        :> Val "as extracted text" nameText "bit of text"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR42 new"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy CaseInsensitive)
       )
 
     it "CR43 Secure conversion" $
@@ -344,6 +350,8 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "as sayable" (sez @"test") "CR43 again 'hi#######xt'"
        :> Val "as extracted text" nameText "hi#######xt"
        :> Val "security bypass extraction" secureNameBypass ("hidden text" :: Text)
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR43 again"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy Secure)
       )
 
   describe "Named style conversions" $ do
@@ -358,6 +366,8 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "matches implicit construction" id "some text"
        :> Val "as sayable" (sez @"test") "CR44 «some text»"
        :> Val "as extracted text" nameText "some text"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR44"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy CaseInsensitive)
       )
 
     it "CR45 UTF8->Secure default conversion" $
@@ -368,6 +378,8 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "matches implicit construction" id "Some TEXT"
        :> Val "as sayable" (sez @"test") "CR45 'So#####XT'"
        :> Val "as extracted text" nameText "So#####XT"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR45"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy Secure)
       )
 
     it "CR46 CaseInsensitive->UTF8 default conversion" $
@@ -379,6 +391,8 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "matches implicit construction" id "some text"
        :> Val "as sayable" (sez @"test") "CR46 'some text'"
        :> Val "as extracted text" nameText "some text"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR46"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy UTF8)
       )
 
     it "CR47 Secure->UTF8 default conversion" $
@@ -390,6 +404,8 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "matches implicit construction" id "So#####XT"
        :> Val "as sayable" (sez @"test") "CR47 'So#####XT'"
        :> Val "as extracted text" nameText "So#####XT"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR47"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy UTF8)
       )
 
     it "CR48 Secure->UTF8 implicit bypass conversion" $
@@ -401,6 +417,8 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "matches implicit construction" id "Some TEXT"
        :> Val "as sayable" (sez @"test") "CR48 'Some TEXT'"
        :> Val "as extracted text" nameText "Some TEXT"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR48"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy UTF8)
       )
 
 instance ConvertName UTF8 "CR40" "CR40-2"
@@ -603,6 +621,8 @@ testJSON = testSpec "Named JSON style" $ do
        :> Val "matches implicit construction" id "some JSON text"
        :> Val "as sayable" (sez @"test") "CR95 2 'some JSON text'"
        :> Val "as extracted text" nameText "some JSON text"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR95 2"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy JSONStyle)
       )
 
     it "CR96 UTF8->JSON default conversion" $

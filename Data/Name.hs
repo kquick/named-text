@@ -1,3 +1,87 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-|
+
+The 'Data.Name' type is designed to be used in place of plain 'String' or
+'Data.Text' types.  Fundamentally 'Data.Name' is an extension of 'Data.Text', but
+it includes two type-level parameters that help to manage the underlying data: a
+style parameter and a nameOf parameter.
+
+ * The style parameter is used to control various functionality and validation
+   around the contained Text type.  For example, one style is CaseInsensitive,
+   which allows comparisons to be done independently of ASCII case.
+
+ * The nameOf parameter is a phantom type string which ensures that two different
+   strings aren't inadvertently swapped or combined.  Any transformation from one
+   nameOf to another nameOf must be intentional.
+
+== Example
+
+For a more complete example, consider a @login@ form which takes an email as the
+username and a password.  Without the Data.Name module, the type signature might
+be:
+
+>    login :: String -> String -> IO Bool
+
+There are a number of deficiencies that can be identified for this
+implementation, including:
+
+* Which argument is the email username, which is the password?
+
+* Is there any protection against simply printing the password to stdout?
+
+* Can these protections be extended to the code calling @login@ and not just
+  observed within the @login@ function itself?
+
+* Email addresses are typically not case sensitive: does the @login@ function
+  provide the appropriate case handling?
+
+Using 'Data.Name', the declaration would look more like:
+
+> login :: Named CaseInsensitive "email" -> Named Secure "password" -> IO Bool
+
+There are a number of advantages that can be observed here:
+
+* The arguments are self-identifying.  No need to try to remember which was used
+  for what purpose.
+
+* The email is treated as a case-insensitive value, both within @login@ but also
+  automatically in any other uses elsewhere.  Setting this value automatically
+  applies case insensitivity conversions, and comparisons are always case
+  independent.
+
+* The password is secured against simply printing it or retrieving the value to
+  use unsafely elsewhere.  There is a special operation to return the actual
+  underlying Text from a secure name, which will presumably be very carefully
+  used only by the @login@ implementation itself.
+
+* Zero runtime cost (other than where needed, such as case translation).
+
+== Alternatives:
+
+One typical alternative approach is to use a @newtype@ wrapper around 'Data.Text'
+or 'String' to provide the type level safety.  This is not a bad approach, but
+this module seeks to provide the following additional benefits over a simple
+@newtype@:
+
+* New names do not need a separate declaration, with associated instance
+  declarations:  simply use a new type string.
+
+* Names are parameterized over both style and identity, with different conversion
+  abilities for both.  Similar functionality could be established for a @newtype@
+  but this would result in either a duplication of effort for each new @newtype@
+  declared this way, or else a parameterization of a generic @newtype@ in the
+  same general manner as provided by this module (and 'Data.Name' *is* simply a
+  @newtype@ at the core).
+
+Another approach is to use the 'Data.Tagged'.  This module is highly similar to
+'Data.Tagged', but this module's 'Named' type has two parameters and the
+underlying type is always 'Data.Text'.  This module can therefore be considered a
+specialization of the generic capabilities of 'Data.Tagged' but more customized
+for representing textual data.
+-}
+
+
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE ExplicitNamespaces #-}
@@ -18,18 +102,52 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module Data.Name
-  ( type Name
-  , Named
-  , name, nameOf, nameProxy, styleProxy, caselessName
-  , NameStyle, UTF8, CaseInsensitive, Secure
-  , HasName, myName
-  , NameText, nameText
+  (
+    -- * Core type
+    Named
+  , nameOf
+  , nameProxy
+  , styleProxy
   , SomeName(SomeName), viewSomeName
+  , HasName, myName
+    -- ** Style management
+    --
+    -- | Defines the style type parameter and some well-known styles directly
+    -- supported by this module.  Users may define additional styles as needed.
+  , NameStyle
   , SomeNameStyle(SomeNameStyle), viewSomeNameStyle
-  , SecureName, secureName, secureNameBypass
+    -- ** Creating a Name
+    --
+    -- | The 'Named' type is an instance of 'IsString', so a name can be created
+    -- from a string via 'fromString'.  In addition, this module defines an
+    -- 'IsText' class with a 'fromText' method that operates in a parallel
+    -- fashion.
   , IsText(fromText)
+    -- ** Conversions
   , ConvertName(convertName)
   , ConvertNameStyle(convertStyle)
+    -- ** Extraction and rendering
+    --
+    -- | For rendering, the 'sayable' package is preferred (as provided by the
+    -- 'Sayable' instances, which is an extension of the "prettyprinter" package
+    -- (and users desiring a "prettyprinter" output can extract that from the
+    -- 'sayable' representation).
+  , NameText, nameText
+
+    -- * Regular (UTF-8) Names
+  , UTF8
+  , type Name
+  , name
+
+    -- * Case Insensitive Names
+  , CaseInsensitive
+  , caselessName
+
+    -- * Secure Names
+  , Secure
+  , SecureName, secureName, secureNameBypass
+
+    -- * Constraining allowed names
   , ValidNames, validName
 )
 where
@@ -48,14 +166,14 @@ import qualified Prettyprinter as PP
 import           Text.Sayable
 
 
--- | The 'Named' is a wrapper around any 'Text' that identifies the type of
--- 'Text' via the @sym@ phantom symbol type, as well as a usage specified by the
--- @style@ type parameter.  Use of 'Named' should always be preferred to using
--- a raw 'Text' (or 'String').
+-- | The 'Named' is a wrapper around any 'Data.Text' that identifies the type of
+-- 'Data.Text' via the @nameOf@ phantom symbol type, as well as a usage specified
+-- by the @style@ type parameter.  Use of 'Named' should always be preferred to
+-- using a raw 'Data.Text' (or 'String').
 
-newtype Named (style :: NameStyle) (sym :: Symbol) =
-  Named { named :: Text }
+newtype Named (style :: NameStyle) (nameOf :: Symbol) = Named { named :: Text }
   deriving (Eq, Ord, Generic, NFData, Semigroup)
+
 
 -- | The NameStyle specifies how the name itself is styled.
 --
@@ -64,149 +182,253 @@ newtype Named (style :: NameStyle) (sym :: Symbol) =
 --  * The 'CaseInsensitive' style indicates that uppercase ASCII characters are
 --    equivalent to their lowercase form.
 --
---  * The Secure style is case sensitive, but does not reveal the full contents
+--  * The 'Secure' style is case sensitive, but does not reveal the full contents
 --    unless the specific "secureName" accessor function is used.  This is useful
 --    for storing secrets (e.g. passphrases, access tokens, etc.) that should not
 --    be fully visible in log messages and other miscellaneous output.
+--
+-- These styles will be described in more detail below.
 
 type NameStyle = Symbol
-type UTF8 = "UTF8" :: NameStyle
-type CaseInsensitive = "CaseInsensitive" :: NameStyle
-type Secure = "SECURE!" :: NameStyle
 
-instance Hashable (Named style sym)
+instance Hashable (Named style nameOf)
 
 
--- | Retrieve the @sym@ type parameter (the "what am I") of a Named as a text
+-- | Retrieve the @nameOf@ type parameter (the "what am I") of a Named as a text
 -- value
-nameOf :: KnownSymbol sym => Named style sym -> Proxy# sym -> String
+
+nameOf :: KnownSymbol nameOf => Named style nameOf -> Proxy# nameOf -> String
 nameOf _ = symbolVal'
 
 
-nameProxy :: KnownSymbol sym => Named style sym -> Proxy sym
+-- | Retrieve a proxy for the @nameOf@ parameter of 'Named'.
+
+nameProxy :: KnownSymbol nameOf => Named style nameOf -> Proxy nameOf
 nameProxy _ = Proxy
 
-styleProxy :: KnownSymbol style => Named style sym -> Proxy style
+-- | Retrieve a proxy for the @style@ parameter of 'Named'.
+
+styleProxy :: KnownSymbol style => Named style nameOf -> Proxy style
 styleProxy _ = Proxy
 
 
-instance {-# OVERLAPPABLE #-} IsString (Named style sym) where
+instance {-# OVERLAPPABLE #-} IsString (Named style nameOf) where
   fromString = Named . fromString
 
 
+-- | The 'IsText' class provides similar functionality to the 'IsString' class,
+-- but with 'Data.Text' sources instead of 'String' sources.  Defining an
+-- instance of this class allows the use of 'fromText' to convert from
+-- 'Data.Text' to the target type (which does not necessarily need to be a
+-- 'Named' type, and this generic class should be deprecated in favor of a
+-- generic implementation the the "text" library).
+
 class IsText a where fromText :: Text -> a
-instance {-# OVERLAPPABLE #-} IsText (Named style sym) where
+instance {-# OVERLAPPABLE #-} IsText (Named style nameOf) where
   fromText = Named
 
 
-class ConvertName style origTy newTy where
+-- | Conversion from a 'Named' with one @nameOf@ to a separate @nameOf@ must be
+-- done explicitly; the recommended method is via an instance of the
+-- 'ConvertName' class, which provides the 'convertName' method to perform the
+-- requested conversion.  If there should not be a conversion between the two
+-- 'Named' types, no 'ConvertName' class should be defined, and users should
+-- refrain from providing an alternative explicit function to perform this
+-- conversion.
+
+class NameText style => ConvertName style origTy newTy where
   convertName :: Named style origTy -> Named style newTy
-  convertName = fromText . named
+  convertName = fromText . nameText
 
-class ConvertNameStyle inpStyle outStyle nameTy where
+
+-- | A 'Named' can be converted from one @style@ to another with an instance of
+-- the 'ConvertNameStyle' class.  If no conversion should be supported, no
+-- instance should be defined.  Users are highly recommended to use the
+-- convertStyle method (instead of a separate manual conversion function) to
+-- ensure proper conversions are performed.
+
+class ( NameText inpStyle
+      , IsText (Named outStyle nameTy)
+      )
+      => ConvertNameStyle inpStyle outStyle nameTy where
   convertStyle :: Named inpStyle nameTy -> Named outStyle nameTy
-  convertStyle = fromText . named
+  convertStyle = fromText . nameText
 
 
--- | For an @"info"@ 'saytag' (and possibly others), a 'Name' doesn't include its
--- label.  Normally, it shows the label followed by the text itself.  The Sayable
--- defers to the Prettyprinting instance for actual representation.
+-- | A general class that can be used to extract the Text back out of a name.
+-- This should be the preferred method of obtaining the raw Text, and should be
+-- used carefully as all of the protections provided by this module are no longer
+-- available for that raw Text.  In addition, no instance of this class is
+-- provided where the name should not be extractable, and this method may extract
+-- a modified form of the text (e.g. the Secure namestyle will return a masked
+-- version of the original Text).
+
+class NameText style where
+  -- | nameText is used to retrieve the original 'Data.Text' text from a 'Named'
+  -- object of the specified style.  This should be the main method used to
+  -- extract the Text from a Named, but it should be used carefully because the
+  -- protections offered by the 'Named' type will no longer be available for the
+  -- raw Text.
+  nameText :: Named style nm -> Text
+  nameText = named
+
+-- | Some objects have (contain) an associated name that identifies or labels
+-- that object.  If they do, they can declare the 'HasName' constraint, and use
+-- its 'myName' method to reconstitute the 'Named' from the object.
+
+class HasName x style nm | x -> style, x -> nm where
+  -- | myName can be used to extract the associated 'Named' from an object.
+  myName :: x -> Named style nm
+
+
+----------------------------------------------------------------------
+-- Rendering
+
+-- | For an @"info"@ @saytag@ (and possibly others), a 'Name' doesn't include its
+-- label and simply shows the 'Data.Text' as would be rendered by
+-- "prettyprinter".
+
 instance NameText style => Sayable "info" (Named style nm) where
   sayable = Saying . PP.pretty . nameText
+
+
+-- | Generically the rendered version includes the textual representation of the
+-- 'nameOf' parameter followed by the 'Data.Text' itself.
+
 instance {-# OVERLAPPABLE #-} (PP.Pretty (Named style nm)
                               ) => Sayable tag (Named style nm)
  where sayable = Saying . PP.pretty
 
 
+-- | There is also a 'Show' method; this is *not* the inverse of a 'Read', and in
+-- fact there is no 'Read' instance for 'Named'.  The 'Sayable' instance is
+-- preferred over 'Show', but 'Show' is provided for default considerations such
+-- as test failure reporting.
 
-----------------------------------------------------------------------
-
--- | The Name type is for the standard/most commonly used style which is
--- orthogonal to a normal String or Text.
-
-type Name = Named UTF8
-
-name :: Name sym -> Text
-name = named
+instance (Sayable "show" (Named style nm)) => Show (Named style nm) where
+  show = sez @"show"
 
 
-instance IsList (Name s) where
-  type Item (Name s) = Item Text
-  fromList = fromText . fromList
-  toList = toList . name
+-- | This is the general pretty rendering for a Named object.  This can be
+-- overriden for specific types or styles for a different rendering.
 
-instance ConvertName UTF8 a a where convertName = id
-instance ConvertName UTF8 "component" "instance component"
-instance ConvertName UTF8 "git.branch" "git.branch|ref"
-instance ConvertName UTF8 "git.ref" "git.branch|ref"
-
-instance KnownSymbol ty => PP.Pretty (Name ty) where
-  pretty nm = (PP.pretty $ nameOf nm proxy#) <+> PP.squotes (PP.pretty (name nm))
+instance  {-# OVERLAPPABLE #-} ( KnownSymbol ty
+                               , NameText style
+                               )
+                               => PP.Pretty (Named style ty) where
+  pretty nm = (PP.pretty $ nameOf nm proxy#)
+              <+> PP.squotes (PP.pretty (nameText nm))
 
 
 ----------------------------------------------------------------------
+
+-- | The 'SomeName' data type is used to existentially hide the identification
+-- type parameter for 'Named' objects.  This is usually used when names of
+-- different types are mixed together in some container or other name-agnostic
+-- interface.
 
 data SomeName =
   forall (s :: Symbol) . KnownSymbol s => SomeName (Name s)
 
+
+-- | The 'viewSomeName' function is used to project the 'Named' object with its
+-- identification type parameter existentially recovered to a function that will
+-- consume that 'Named' object and return some sort of result.
+
 viewSomeName :: (forall (s :: Symbol) . KnownSymbol s => Name s -> r) -> SomeName -> r
 viewSomeName f (SomeName n) = f n
 
+
+-- | The 'SomeNameStyle' data type is used to existentially hide the style type
+-- of 'Named' objects.  This is usually used when names of different styles are
+-- mixed together in some container or other style-agnostic interface.
 
 data SomeNameStyle nameTy =
   forall (s :: Symbol)
   . (KnownSymbol s, NameText s)
   => SomeNameStyle (Named s nameTy)
 
-viewSomeNameStyle :: (forall (s :: Symbol) . KnownSymbol s => Named s nameTy -> r)
+
+-- | The 'viewSomeNameStyle' function is used to project the 'Named' object with
+-- its style type existentially recovered to a function that will consume that
+-- 'Named' object and return some sort of result.
+
+viewSomeNameStyle :: (forall (s :: Symbol) . (KnownSymbol s, NameText s) => Named s nameTy -> r)
                   -> SomeNameStyle nameTy -> r
 viewSomeNameStyle f (SomeNameStyle n) = f n
 
 
 ----------------------------------------------------------------------
+-- * UTF8 Names
 
--- | Some objects have (contain) an associated name.  If they do, they can
--- declare the HasName constraint, and use myName to reconsistute the name from
--- the object.
+-- | The UTF8 type alias is useable as the @style@ parameter of a 'Named' type.
+-- The type-string form may also be used but the type alias is designed to allow
+-- abstraction from the raw type-string value.
 
-class HasName x style nm | x -> style, x -> nm where
-  myName :: x -> Named style nm
+type UTF8 = "UTF8" :: NameStyle
+
+-- | The Name type is for the standard/most commonly used style which is
+-- orthogonal to a normal String or Text.  Because this is the most frequently
+-- used form of 'Named', it has a type alias to shorten the usage references.
+
+type Name = Named UTF8
+
+{-# DEPRECATED name "Use nameText instead" #-}
+name :: Name nameOf -> Text
+name = nameText
 
 
--- | A general class that can be used to extract the Text back out of a name.
+instance IsList (Name s) where
+  type Item (Name s) = Item Text
+  fromList = fromText . fromList
+  toList = toList . nameText
 
-class NameText style where
-  nameText :: Named style nm -> Text
-  nameText = named
+instance ConvertName UTF8 a a where convertName = id
 
 instance NameText UTF8
 
 
 ----------------------------------------------------------------------
+-- * CaseInsensitive Named objects
 
-instance {-# OVERLAPPING #-} IsString (Named CaseInsensitive sym) where
+-- | The CaseInsensitive style of Named objects will allow case-insensitive ASCII
+-- comparisons between objects.  On creation, all text is converted to lowercase,
+-- so the original input case is not preserved on extraction or rendering.
+
+type CaseInsensitive = "CaseInsensitive" :: NameStyle
+
+instance {-# OVERLAPPING #-} IsString (Named CaseInsensitive nameOf) where
   fromString = Named . T.toLower . fromString
 
-instance {-# OVERLAPPING #-} IsText (Named CaseInsensitive sym) where
+instance {-# OVERLAPPING #-} IsText (Named CaseInsensitive nameOf) where
   fromText = Named . T.toLower
 
 instance KnownSymbol ty => PP.Pretty (Named CaseInsensitive ty) where
   pretty nm = (PP.pretty $ nameOf nm proxy#)
               <+> PP.surround (PP.pretty (caselessName nm)) "«" "»"
 
-instance NameText CaseInsensitive where
-  nameText = named
+instance NameText CaseInsensitive
 
-caselessName :: Named CaseInsensitive sym -> Text
-caselessName = named
+{-# DEPRECATED caselessName "Use nameText instead" #-}
+caselessName :: Named CaseInsensitive nameOf -> Text
+caselessName = nameText
 
 
 ----------------------------------------------------------------------
+-- * Secure Named objects
 
--- | The SecureName is like Name, but its display form does not reveal
--- the full name.
+-- | The Secure style of Named objects masks the internal text on extraction or
+-- rendering to avoid leaking information.  The actual internal text can be
+-- retrieved only with the explicit 'secureNameBypass' function.
+
+type Secure = "SECURE!" :: NameStyle
+
+-- | The SecureName is like Name, but its display form does not reveal the full
+-- name.  The use of the 'nameText' extractor or any of the renderers will
+-- occlude a portion of the secure name to avoid revealing it in its entirety.
 
 type SecureName = Named Secure
+
 
 -- | The secureName accessor is used to obtain the name field from a Secure
 -- Named.  This is the normal accessor for a Secure Named and will occlude a
@@ -214,39 +436,52 @@ type SecureName = Named Secure
 -- the full Secure Named text is needed, the 'secureNameBypass' accessor should
 -- be used instead.
 
-secureName :: Named Secure sym -> Text
+{-# DEPRECATED secureName "Use nameText instead" #-}
+secureName :: Named Secure nameOf -> Text
 secureName nm = if T.length (named nm) < 5
                 then T.replicate 8 "#"
                 else ((T.take 2 $ named nm)
                       <> T.replicate (T.length (named nm) - 4) "#"
                       <> T.reverse (T.take 2 $ T.reverse $ named nm))
 
+
 -- | The secureNameBypass accessor is used to obtain the raw Text from a Secure
--- Named; this essentially bypasses the security protection and should only be
+-- Named; this essentially BYPASSES THE SECURITY PROTECTION and should only be
 -- used in the limited cases when the raw form is absolutely needed.
 
-secureNameBypass :: Named Secure sym -> Text
+secureNameBypass :: Named Secure nameOf -> Text
 secureNameBypass = named
 
--- instance NameText Secure sym   <-- explicitly not defined!
-
-instance KnownSymbol ty => PP.Pretty (Named Secure ty) where
-  pretty nm = (PP.pretty $ nameOf nm proxy#)
-              <+> PP.squotes (PP.pretty (named nm))
-
--- Note that there should be no instance of ToJSON for a SecureName!
+instance NameText Secure where
+  nameText = secureName
 
 
 ----------------------------------------------------------------------
+-- Constraining allowed names
+
 -- | The ValidNames constraint can be used to specify the list of allowed names
--- for a parameterized name argument.
+-- for a parameterized name argument.  For example:
+--
+-- > foo :: ValidNames n '[ "right", "correct" ] => Name n -> a
+--
+-- The above allows @foo@ to be called with a @Name "right"@ or a @Name
+-- "correct"@, but if it is called with any other 'Named' @nameOf@ parameter then
+-- a compilation error will be generated indicating "the supplied @nameOf@ type
+-- parameter is not in the allowed Names".
+--
+-- All instances of this class are pre-defined by this module and the user should
+-- not need to create any instances.
 
 
-class ( KnownNat (AllowedNameType nty ntl)
-      , DisallowedNameType nty ntl ntl
+class ( KnownNat (AllowedNameType nameOf ntl)
+      , DisallowedNameType nameOf ntl ntl
       )
-  => ValidNames (nty :: Symbol) (ntl :: [Symbol]) where
-  validName :: Proxy ntl -> Name nty -> Text
+  => ValidNames (nameOf :: Symbol) (ntl :: [Symbol]) where
+  -- | The validName method is used to extract the text form of a 'Name' for
+  -- which @nameOf@ is a member of the valid names specified by the @ntl@ type
+  -- list.  It corresponds to 'nameText' while also providing the validation
+  -- of the extraction.
+  validName :: Proxy ntl -> Name nameOf -> Text
 
 
 ----------------------------------------------------------------------

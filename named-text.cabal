@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               named-text
-version:            1.1.1.0
+version:            1.1.2.0
 synopsis:           A parameterized named text type and associated functionality.
 description:
   .
@@ -24,11 +24,11 @@ license:            ISC
 license-file:       LICENSE
 author:             Kevin Quick
 maintainer:         kquick@galois.com
-copyright:          Galois Inc, 2022
+copyright:          Galois Inc, 2023
 category:           Data
 build-type:         Simple
 extra-doc-files:    CHANGELOG.md
-tested-with:        GHC == 9.4.2, GHC == 9.2.4, GHC == 9.0.2, GHC == 8.10.7, GHC == 8.8.4
+tested-with:        GHC == 9.4.4, GHC == 9.2.4, GHC == 9.0.2, GHC == 8.10.7, GHC == 8.8.4
 
 source-repository head
   type: git

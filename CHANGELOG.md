@@ -1,5 +1,9 @@
 # Revision history for named-text
 
+## 1.1.2.0 -- 2023-01-17
+
+* Updated sayable package upper bound to < 1.2.
+
 ## 1.1.1.0 -- 2022-12-28
 
 * Added optional Data.Name.JSON providing `JSONSchema` with Aeson `ToJSON` and

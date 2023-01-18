@@ -62,7 +62,7 @@ library
                     , deepseq
                     , hashable
                     , prettyprinter >= 1.7.0 && < 1.8
-                    , sayable >= 1.0 && < 1.1
+                    , sayable >= 1.0 && < 1.2
                     , text
     exposed-modules:  Data.Name
     if flag(with-json)

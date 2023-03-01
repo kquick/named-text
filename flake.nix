@@ -77,9 +77,12 @@
             dontHaddock (
               dontCheck (
                 dontBenchmark (
-                  disableLibraryProfiling (
-                    disableExecutableProfiling
-                      drv))));
+                  # disableLibraryProfiling (
+                  #   disableExecutableProfiling
+                      drv)
+                # )
+              )
+            );
         in rec {
           ghc = pkgs.haskell.compiler.ghc8107;
           named-text = mkHaskell "named-text" self {

@@ -4,13 +4,13 @@
   nixConfig.bash-prompt-suffix = "named-text.env} ";
 
   inputs = {
-    nixpkgs = { url = "github:nixos/nixpkgs/22.05"; };
+    nixpkgs = { url = "github:nixos/nixpkgs/22.11"; };
     levers = {
       url = "github:kquick/nix-levers";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sayable = {
-      url = "/home/kquick/Projects/sayable/sayable-2211";
+      url = "github:kquick/sayable";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.levers.follows = "levers";
     };

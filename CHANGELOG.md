@@ -1,5 +1,9 @@
 # Revision history for named-text
 
+## 1.1.3.0 -- 2023-06-20
+
+* Allow build with GHC 9.6.
+
 ## 1.1.2.0 -- 2023-01-17
 
 * Updated sayable package upper bound to < 1.2.

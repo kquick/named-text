@@ -35,17 +35,6 @@
         pkgs.cabal-install
       ];
     in rec {
-      defaultPackage = levers.eachSystem (s:
-        self.packages.${s}.named-text.default);
-      devShell = levers.eachSystem (s:
-        let pkgs = import nixpkgs { system=s; };
-        in shellWith pkgs shellPkgs
-          (self.packages.${s}.named-text_tests.default.env.overrideAttrs (a:
-            {
-              # Set envvars here
-            }
-          )));
-
       devShells =
         let oneshell = s: n:
               let pkgs = import nixpkgs { system=s; };
@@ -62,7 +51,11 @@
           (s:
             let pkgs = import nixpkgs { system=s; };
                 names = builtins.attrNames (self.packages.${s});
-            in pkgs.lib.genAttrs names (oneshell s)
+                outs = builtins.removeAttrs
+                  (pkgs.lib.genAttrs names (oneshell s))
+                  [ "ghc" ];
+                shells = pkgs.lib.attrsets.mapAttrs (n: v: v.default) outs;
+            in shells
           ) ;
 
       packages = levers.eachSystem (system:
@@ -85,6 +78,7 @@
             );
         in rec {
           ghc = pkgs.haskell.compiler.ghc8107;
+          default = named-text;
           named-text = mkHaskell "named-text" self {
             inherit sayable;
             adjustDrv = args:

@@ -29,7 +29,7 @@ jobs:
           nix_path: nixpkgs=channel:nixos-23.05
       - name: test
         shell: bash
-        run: nix build .#TESTS
+        run: nix build -L .#TESTS
   doc:
     runs-on: ubuntu-latest
     steps:

@@ -4,7 +4,7 @@
   nixConfig.bash-prompt-suffix = "named-text.env} ";
 
   inputs = {
-    nixpkgs = { url = "github:nixos/nixpkgs/22.11"; };
+    nixpkgs = { url = "github:nixos/nixpkgs/23.05"; };
     levers = {
       url = "github:kquick/nix-levers";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -14,14 +14,20 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.levers.follows = "levers";
     };
-    tasty-hspec-src = {
-      url = "github:mitchellwrosen/tasty-hspec";
+    parameterized-utils-src = {
+      url = "github:galoisinc/parameterized-utils";
       flake = false;
+    };
+    tasty-checklist = {
+      url = "github:kquick/tasty-checklist";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.parameterized-utils-src.follows = "parameterized-utils-src";
     };
   };
 
   outputs = { self, levers, nixpkgs
-            , tasty-hspec-src
+            , parameterized-utils-src
+            , tasty-checklist
             , sayable }:
     let
       shellWith = pkgs: adds: drv: drv.overrideAttrs(old:
@@ -81,12 +87,12 @@
           default = named-text;
           named-text = mkHaskell "named-text" self {
             inherit sayable;
-            adjustDrv = args:
-              drv:
-                haskellAdj drv;
+            adjustDrv = args: haskellAdj;
             };
           named-text_tests = mkHaskell "named-text_tests" self {
-            inherit sayable tasty-hspec;
+            inherit parameterized-utils;
+            inherit sayable;
+            inherit tasty-checklist;
             adjustDrv = args:
               drv:
               pkgs.haskell.lib.doBenchmark
@@ -94,7 +100,8 @@
                   (haskellAdj drv)
                 );
           };
-          tasty-hspec = mkHaskell "tasty-hspec" tasty-hspec-src {};
+          parameterized-utils = mkHaskell "parameterized-utils"
+            parameterized-utils-src {};
         });
     };
 }

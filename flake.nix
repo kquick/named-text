@@ -21,13 +21,32 @@
     tasty-checklist = {
       url = "github:kquick/tasty-checklist";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.levers.follows = "levers";
       inputs.parameterized-utils-src.follows = "parameterized-utils-src";
+      inputs.hedgehog-src.follows = "hedgehog-src";
+      inputs.hedgehog-classes-src.follows = "hedgehog-classes-src";
+      inputs.tasty-hedgehog-src.follows = "tasty-hedgehog-src";
+    };
+    hedgehog-src = {
+      url = github:hedgehogqa/haskell-hedgehog?dir=hedgehog;
+      flake = false;
+    };
+    hedgehog-classes-src = {
+      url = github:hedgehogqa/haskell-hedgehog-classes;
+      flake = false;
+    };
+    tasty-hedgehog-src = {
+      url = github:qfpl/tasty-hedgehog;
+      flake = false;
     };
   };
 
   outputs = { self, levers, nixpkgs
             , parameterized-utils-src
             , tasty-checklist
+            , hedgehog-src
+            , hedgehog-classes-src
+            , tasty-hedgehog-src
             , sayable }:
     let
       shellWith = pkgs: adds: drv: drv.overrideAttrs(old:
@@ -125,7 +144,16 @@
               pkgs.haskell.lib.doHaddock (haskellAdj drv);
             };
           parameterized-utils = mkHaskell "parameterized-utils"
-            parameterized-utils-src {};
+            parameterized-utils-src {
+              inherit tasty-hedgehog hedgehog-classes;
+            };
+          tasty-hedgehog = mkHaskell "tasty-hedgehog" tasty-hedgehog-src {
+            inherit hedgehog;
+          };
+          hedgehog = mkHaskell "hedgehog" "${hedgehog-src}/hedgehog" {};
+          hedgehog-classes = mkHaskell "hedgehog-classes" hedgehog-classes-src {
+            inherit hedgehog;
+          };
         });
     };
 }

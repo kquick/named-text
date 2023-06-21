@@ -85,6 +85,24 @@
         in rec {
           ghc = pkgs.haskell.compiler.ghc8107;
           default = named-text;
+          TESTS =
+            builtins.derivation
+            {
+            name = "all_named-text_flake_tests";
+            inherit system;
+            builder = "${pkgs.bash}/bin/bash";
+            args = [ "-c" "echo OK > $out" ];
+            buildInputs = [ named-text_tests ];
+          };
+          DOC =
+            builtins.derivation
+            {
+            name = "all_named-text_flake_doc";
+            inherit system;
+            builder = "${pkgs.bash}/bin/bash";
+            args = [ "-c" "echo OK > $out" ];
+            buildInputs = [ named-text_doc ];
+          };
           named-text = mkHaskell "named-text" self {
             inherit sayable;
             adjustDrv = args: haskellAdj;
@@ -100,6 +118,12 @@
                   (haskellAdj drv)
                 );
           };
+          named-text_doc = mkHaskell "named-text_doc" self {
+            inherit sayable;
+            adjustDrv = args:
+              drv:
+              pkgs.haskell.lib.doHaddock (haskellAdj drv);
+            };
           parameterized-utils = mkHaskell "parameterized-utils"
             parameterized-utils-src {};
         });

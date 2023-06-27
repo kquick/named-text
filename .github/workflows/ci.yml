@@ -23,20 +23,18 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v20
         with:
           nix_path: nixpkgs=channel:nixos-23.05
       - name: test
         shell: bash
-        run: nix build -L .#TESTS
+        run: nix build -L github:${{ github.repository }}/${{ github.sha }}.#TESTS
   doc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v20
         with:
           nix_path: nixpkgs=channel:nixos-23.05
       - name: doc
         shell: bash
-        run: nix build .#DOC
+        run: nix build github:${{ github.repository }}/${{ github.sha }}.#DOC

@@ -90,6 +90,7 @@
             # ghcver = [ "ghc8107" ];
             };
           pkgs = import nixpkgs { inherit system; };
+          wrap = levers.pkg_wrapper system pkgs;
           haskellAdj = drv:
             with (pkgs.haskell).lib;
             dontHaddock (
@@ -104,24 +105,8 @@
         in rec {
           ghc = pkgs.haskell.compiler.ghc8107;
           default = named-text;
-          TESTS =
-            builtins.derivation
-            {
-            name = "all_named-text_flake_tests";
-            inherit system;
-            builder = "${pkgs.bash}/bin/bash";
-            args = [ "-c" "echo OK > $out" ];
-            buildInputs = [ named-text_tests ];
-          };
-          DOC =
-            builtins.derivation
-            {
-            name = "all_named-text_flake_doc";
-            inherit system;
-            builder = "${pkgs.bash}/bin/bash";
-            args = [ "-c" "echo OK > $out" ];
-            buildInputs = [ named-text_doc ];
-          };
+          TESTS = wrap "named-text-TESTS" [ named-text_tests ];
+          DOC = wrap "named-text-DOC" [ named-text_doc ];
           named-text = mkHaskell "named-text" self {
             inherit sayable;
             adjustDrv = args: haskellAdj;

@@ -28,7 +28,7 @@ jobs:
           nix_path: nixpkgs=channel:nixos-23.05
       - name: test
         shell: bash
-        run: nix build -L github:${{ github.repository }}/${{ github.sha }}.#TESTS
+        run: nix build -L github:${{ github.repository }}/${{ github.sha }}#TESTS
   doc:
     runs-on: ubuntu-latest
     steps:
@@ -37,4 +37,4 @@ jobs:
           nix_path: nixpkgs=channel:nixos-23.05
       - name: doc
         shell: bash
-        run: nix build github:${{ github.repository }}/${{ github.sha }}.#DOC
+        run: nix build github:${{ github.repository }}/${{ github.sha }}#DOC

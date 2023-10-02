@@ -80,7 +80,7 @@
                   (pkgs.lib.genAttrs names (oneshell s))
                   [ "ghc" ];
                 shells = pkgs.lib.attrsets.mapAttrs (n: v: v.default) outs;
-            in shells
+            in shells // { default = devShells.${s}.named-text_tests; }
           ) ;
 
       packages = levers.eachSystem (system:

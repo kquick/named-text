@@ -429,6 +429,11 @@ instance KnownSymbol ty => PP.Pretty (Named CaseInsensitive ty) where
 instance NameText CaseInsensitive
 
 
+instance ConvertNameStyle UTF8 CaseInsensitive nameTy
+
+-- No ConvertNameStyle is defined for CaseInsensitive -> UTF8 because this cannot
+-- be round-tripped.
+
 
 ----------------------------------------------------------------------
 -- * Secure Named objects

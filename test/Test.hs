@@ -428,7 +428,6 @@ instance ConvertName CaseInsensitive "CR42" "CR42 new"
 instance ConvertName Secure "CR43" "CR43 again" where
   convertName = fromText . secureNameBypass
 
-instance ConvertNameStyle UTF8 CaseInsensitive "CR44"
 instance ConvertNameStyle UTF8 Secure "CR45"
 instance ConvertNameStyle CaseInsensitive UTF8 "CR46"
 instance ConvertNameStyle Secure UTF8 "CR47"

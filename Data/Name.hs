@@ -193,9 +193,9 @@ newtype Named (style :: NameStyle) (nameOf :: Symbol) = Named { named :: Text }
 --    equivalent to their lowercase form.
 --
 --  * The 'Secure' style is case sensitive, but does not reveal the full contents
---    unless the specific "secureName" accessor function is used.  This is useful
---    for storing secrets (e.g. passphrases, access tokens, etc.) that should not
---    be fully visible in log messages and other miscellaneous output.
+--    unless the specific "secureNameBypass" accessor function is used.  This is
+--    useful for storing secrets (e.g. passphrases, access tokens, etc.) that
+--    should not be fully visible in log messages and other miscellaneous output.
 --
 -- These styles will be described in more detail below.
 

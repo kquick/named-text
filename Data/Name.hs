@@ -138,15 +138,13 @@ module Data.Name
     -- * Regular (UTF-8) Names
   , UTF8
   , type Name
-  , name
 
     -- * Case Insensitive Names
   , CaseInsensitive
-  , caselessName
 
     -- * Secure Names
   , Secure
-  , SecureName, secureName, secureNameBypass
+  , SecureName, secureNameBypass
 
     -- * HTML-renderable Names
   , HTMLStyle
@@ -399,11 +397,6 @@ type UTF8 = "UTF8" :: NameStyle
 
 type Name = Named UTF8
 
-{-# DEPRECATED name "Use nameText instead" #-}
-name :: Name nameOf -> Text
-name = nameText
-
-
 instance IsList (Name s) where
   type Item (Name s) = Item Text
   fromList = fromText . fromList
@@ -431,13 +424,10 @@ instance {-# OVERLAPPING #-} IsText (Named CaseInsensitive nameOf) where
 
 instance KnownSymbol ty => PP.Pretty (Named CaseInsensitive ty) where
   pretty nm = (PP.pretty $ nameOf nm proxy#)
-              <+> PP.surround (PP.pretty (caselessName nm)) "«" "»"
+              <+> PP.surround (PP.pretty (nameText nm)) "«" "»"
 
 instance NameText CaseInsensitive
 
-{-# DEPRECATED caselessName "Use nameText instead" #-}
-caselessName :: Named CaseInsensitive nameOf -> Text
-caselessName = nameText
 
 
 ----------------------------------------------------------------------
@@ -462,7 +452,6 @@ type SecureName = Named Secure
 -- the full Secure Named text is needed, the 'secureNameBypass' accessor should
 -- be used instead.
 
-{-# DEPRECATED secureName "Use nameText instead" #-}
 secureName :: Named Secure nameOf -> Text
 secureName nm = if T.length (named nm) < 5
                 then T.replicate 8 "#"
@@ -580,7 +569,7 @@ instance ( KnownNat (AllowedNameType nty ntl)  -- n.b. if this fails, see Note-1
          , DisallowedNameType nty ntl ntl
          )
    => ValidNames nty ntl where
-  validName _ = name
+  validName _ = nameText
 
 type family AllowedNameType (nty :: Symbol) (ntl :: [Symbol]) :: Nat where
   AllowedNameType nty (nty ': ntl) = 0

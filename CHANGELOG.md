@@ -4,6 +4,7 @@
 
 * Add HTML NameStyle and conversions between HTML and UTF8 name styles.
 * Add conversion from UTF8 to CaseInsensitive name styles (but not the reverse).
+* Remove deprecated functions: name, caselessName, secureName
 
 ## 1.1.4.0 -- 2023-10-01
 

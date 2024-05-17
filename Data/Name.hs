@@ -148,6 +148,10 @@ module Data.Name
   , Secure
   , SecureName, secureName, secureNameBypass
 
+    -- * HTML-renderable Names
+  , HTMLStyle
+  , rawNamedHTML
+
     -- * Constraining allowed names
   , ValidNames, validName
 
@@ -476,6 +480,68 @@ secureNameBypass = named
 
 instance NameText Secure where
   nameText = secureName
+
+-- No ConvertNameStyle forms are defined for Secure because this is a lossy
+-- conversion due to masking.
+
+----------------------------------------------------------------------
+-- * HTML Names
+
+-- | The HTMLStyle type alias is useable as the @style@ parameter of a 'Named'
+-- type.  The type-string form may also be used but the type alias is designed to
+-- allow abstraction from the raw type-string value.
+--
+-- Text contained in these styles is safe to represent in HTML: angle brackets
+-- are converted to their html representation, and ampersands and quotes are
+-- escaped.
+
+-- n.b. JSON is a separate module for conditional compilation without introducing
+-- additional dependencies, but there are no additional dependencies for
+-- HTMLStyle.
+
+type HTMLStyle = "HTML" :: NameStyle
+
+instance {-# OVERLAPPING #-} IsString (Named HTMLStyle nameOf) where
+  fromString = Named . toHTMLSafe . fromString
+
+instance {-# OVERLAPPING #-} IsText (Named HTMLStyle nameOf) where
+  fromText = Named . toHTMLSafe
+
+instance KnownSymbol ty => PP.Pretty (Named HTMLStyle ty) where
+  pretty = PP.pretty . nameText
+
+instance NameText HTMLStyle
+
+-- | To create a Named HTMLStyle from Text that is raw HTML and shouldn't have
+-- escaping performed.
+
+rawNamedHTML :: Text -> Named HTMLStyle nameOf
+rawNamedHTML = Named
+
+toHTMLSafe :: Text -> Text
+toHTMLSafe = T.replace "<" "&lt;"
+             . T.replace ">" "&gt;"
+             . T.replace "\"" "&quot;"
+             . T.replace "'" "&#39;"
+             . T.replace "&" "&amp;"  -- do this first because & is added above
+
+fromSafeHTML :: Text -> Text
+fromSafeHTML = T.replace "&amp;" "&"
+               . T.replace "&gt;" ">"
+               . T.replace "&lt;" "<"
+               . T.replace "&quot;" "\""
+               . T.replace "&#39;" "'"
+
+instance IsList (Named HTMLStyle s) where
+  type Item (Named HTMLStyle s) = Item Text
+  fromList = fromText . fromList
+  toList = toList . nameText
+
+instance ConvertName HTMLStyle a a where convertName = id
+
+instance ConvertNameStyle UTF8 HTMLStyle nameTy
+instance ConvertNameStyle HTMLStyle UTF8 nameTy where
+  convertStyle = fromText . fromSafeHTML . nameText
 
 
 ----------------------------------------------------------------------

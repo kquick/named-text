@@ -10,7 +10,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sayable = {
-      url = "github:kquick/sayable";
+      url = "github:kquick/sayable/9c76cc5";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.levers.follows = "levers";
     };

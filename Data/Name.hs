@@ -1,6 +1,8 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 {-|
 
 The 'Data.Name' type is designed to be used in place of plain 'String' or
@@ -105,7 +107,7 @@ for representing textual data.
 module Data.Name
   (
     -- * Core type
-    Named
+    Named  -- type only, no constructor or member references
   , nameOf
   , nameProxy
   , styleProxy
@@ -159,14 +161,12 @@ module Data.Name
 )
 where
 
-import           Control.DeepSeq ( NFData )
 import           Data.Hashable ( Hashable )
 import           Data.Proxy ( Proxy(Proxy) )
 import           Data.String ( IsString(fromString) )
 import           Data.Text ( Text )
 import qualified Data.Text as T
 import           GHC.Exts ( Proxy#, proxy#, IsList(fromList, toList), Item )
-import           GHC.Generics ( Generic )
 import           GHC.TypeLits
 import           Prettyprinter ( (<+>) )
 import qualified Prettyprinter as PP
@@ -176,32 +176,7 @@ import           Text.Sayable
 import           Numeric.Natural
 #endif
 
--- | The 'Named' is a wrapper around any 'Data.Text' that identifies the type of
--- 'Data.Text' via the @nameOf@ phantom symbol type, as well as a usage specified
--- by the @style@ type parameter.  Use of 'Named' should always be preferred to
--- using a raw 'Data.Text' (or 'String').
-
-newtype Named (style :: NameStyle) (nameOf :: Symbol) = Named { named :: Text }
-  deriving (Eq, Ord, Generic, NFData, Semigroup)
-
-
--- | The NameStyle specifies how the name itself is styled.
---
---  * The 'UTF8' default style is orthogonal to a normal String or Text.
---
---  * The 'CaseInsensitive' style indicates that uppercase ASCII characters are
---    equivalent to their lowercase form.
---
---  * The 'Secure' style is case sensitive, but does not reveal the full contents
---    unless the specific "secureNameBypass" accessor function is used.  This is
---    useful for storing secrets (e.g. passphrases, access tokens, etc.) that
---    should not be fully visible in log messages and other miscellaneous output.
---
--- These styles will be described in more detail below.
-
-type NameStyle = Symbol
-
-instance Hashable (Named style nameOf)
+import Data.Name.Internal
 
 
 -- | Retrieve the @nameOf@ type parameter (the "what am I") of a Named as a text
@@ -406,6 +381,10 @@ instance ConvertName UTF8 a a where convertName = id
 
 instance NameText UTF8
 
+deriving instance Eq (Named UTF8 nameOf)
+deriving instance Ord (Named UTF8 nameOf)
+deriving instance Hashable (Named UTF8 nameOf)
+
 
 ----------------------------------------------------------------------
 -- * CaseInsensitive Named objects
@@ -433,6 +412,13 @@ instance ConvertNameStyle UTF8 CaseInsensitive nameTy
 
 -- No ConvertNameStyle is defined for CaseInsensitive -> UTF8 because this cannot
 -- be round-tripped.
+
+-- CaseInsensitive names are normalized during construction, so standard
+-- instances are sufficient:
+
+deriving instance Eq (Named CaseInsensitive nameOf)
+deriving instance Ord (Named CaseInsensitive nameOf)
+deriving instance Hashable (Named CaseInsensitive nameOf)
 
 
 ----------------------------------------------------------------------
@@ -477,6 +463,14 @@ instance NameText Secure where
 
 -- No ConvertNameStyle forms are defined for Secure because this is a lossy
 -- conversion due to masking.
+
+-- Secure names are constructed in a standard manner and differ only in
+-- projection out of the Name, so standard instances are sufficient:
+
+deriving instance Eq (Named Secure nameOf)
+deriving instance Ord (Named Secure nameOf)
+deriving instance Hashable (Named Secure nameOf)
+
 
 ----------------------------------------------------------------------
 -- * HTML Names
@@ -537,6 +531,16 @@ instance ConvertNameStyle UTF8 HTMLStyle nameTy
 instance ConvertNameStyle HTMLStyle UTF8 nameTy where
   convertStyle = fromText . fromSafeHTML . nameText
 
+-- HTMLStyle names are normalized during construction, so standard instances are
+-- sufficient:
+
+deriving instance Eq (Named HTMLStyle nameOf)
+deriving instance Ord (Named HTMLStyle nameOf)
+deriving instance Hashable (Named HTMLStyle nameOf)
+
+-- Trigger faults in the code and trace them for impact
+
+-- GA has no MB experience, so don't know how much to expect or have any expectations.  Fault triggering and detection would be the principle focus.
 
 ----------------------------------------------------------------------
 -- Constraining allowed names

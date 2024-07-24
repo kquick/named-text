@@ -1,7 +1,13 @@
 # Revision history for named-text
 
-## 1.1.5.0 -- 2024-05-?
+## 1.1.5.0 -- 2024-07-?
 
+* Remove default Eq, Ord, and Hashable instances for all Named. An explicit or
+  derived instance must be declared for each NamedStyle and/or nameOf variant.
+  This is to allow a particular NamedStyle or nameOf variant to override the
+  instance implementation of these functions.  Instances are provided the UTF8,
+  CaseInsensitive, Secure, HTMLStyle, and JSONStyle Named so any module using
+  only those styles will be backward compatible. [1.1.4.0.100]
 * Add HTML NameStyle and conversions between HTML and UTF8 name styles.
 * Add conversion from UTF8 to CaseInsensitive name styles (but not the reverse).
 * Remove deprecated functions: name, caselessName, secureName

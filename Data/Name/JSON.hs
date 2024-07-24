@@ -22,7 +22,9 @@ module Data.Name.JSON where
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Functor.Contravariant ( (>$<) )
+import Data.Hashable ( Hashable )
 import Data.Name
+import Data.Name.Internal
 import Data.String ( IsString(fromString) )
 
 
@@ -35,6 +37,13 @@ import Data.String ( IsString(fromString) )
 type JSONStyle = "JSON" :: NameStyle
 
 instance NameText JSONStyle
+
+-- JSON names have no special considerations, so standard instances are
+-- sufficient:
+
+deriving instance Eq (Named JSONStyle nameOf)
+deriving instance Ord (Named JSONStyle nameOf)
+deriving instance Hashable (Named JSONStyle nameOf)
 
 instance ConvertNameStyle JSONStyle UTF8 nameOf
 instance ConvertNameStyle UTF8 JSONStyle nameOf

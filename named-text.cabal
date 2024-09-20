@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               named-text
-version:            1.2.0.0
+version:            1.2.1.0
 synopsis:           A parameterized named text type and associated functionality.
 description:
   .

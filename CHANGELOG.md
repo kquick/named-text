@@ -1,5 +1,9 @@
 # Revision history for named-text
 
+## 1.2.1.0 -- 2024-09-19
+
+* Allow building withn GHC 9.8 and 9.10.
+
 ## 1.2.0.0 -- 2024-07-23
 
 * Remove default Eq, Ord, and Hashable instances for all Named. An explicit or

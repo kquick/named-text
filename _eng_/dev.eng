@@ -1,0 +1,13 @@
+dev
+ subcmd
+   build
+     Builds the named-text library
+       exec = cabal build named-text
+   test
+     testcase
+       namedTests
+         type = EXE
+         runner = cabal_test
+     testrunner
+       cabal_test
+         exec = cabal test {TestName}

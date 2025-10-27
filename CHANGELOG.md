@@ -1,8 +1,12 @@
 # Revision history for named-text
 
+## 1.2.2.0 -- 2024-10-26
+
+* Allow building with GHC 9.12.
+
 ## 1.2.1.0 -- 2024-09-19
 
-* Allow building withn GHC 9.8 and 9.10.
+* Allow building with GHC 9.8 and 9.10.
 
 ## 1.2.0.0 -- 2024-07-23
 

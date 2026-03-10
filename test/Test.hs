@@ -65,6 +65,7 @@ instance Sayable "test" (Named s n)
          => TestShow (Named s n) where testShow = sez @"test"
 instance TestShow (Proxy UTF8) where testShow _ = "Proxy :: \"UTF8\""
 instance TestShow (Proxy CaseInsensitive) where testShow _ = "Proxy :: !Case"
+instance TestShow (Proxy CaseInsensitivePreserve) where testShow _ = "Proxy :: !Case+Preserved"
 instance TestShow (Proxy Secure) where testShow _ = "Proxy :: Secure"
 instance TestShow [SomeName] where testShow = testShowList
 instance TestShow SomeName where testShow = viewSomeName testShow
@@ -156,6 +157,28 @@ testCreate = testSpec "Named Creation" $
        :> Val "security bypass text" secureNameBypass ("z" :: Text)
       )
 
+    it "CR8 creates CaseInsensitivePreserve from IsText" $
+      withChecklist "CR8" $
+      fromText @(Named CaseInsensitivePreserve "CR8") ("Test teXT" :: Text)
+      `checkValues`
+      (Empty
+       :> Val "overloaded equivalent text value" id "tesT tExt"
+       :> Val "name parameter value" (\n -> nameOf n proxy#) "CR8"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy CaseInsensitivePreserve)
+       :> Val "extracted text" nameText ("Test teXT" :: Text)
+      )
+
+    it "CR9 creates CaseInsensitivePreserve from IsString" $
+      withChecklist "CR9" $
+      fromString @(Named CaseInsensitivePreserve "CR9") ("TEst STring" :: String)
+      `checkValues`
+      (Empty
+       :> Val "overloaded equivalent string value" id "teST sTring"
+       :> Val "name parameter value" (\n -> nameOf n proxy#) "CR9"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy CaseInsensitivePreserve)
+       :> Val "extracted text" nameText ("TEst STring" :: Text)
+      )
+
 
 testRender :: IO TestTree
 testRender = testSpec "Named Rendering" $
@@ -245,6 +268,31 @@ testRender = testSpec "Named Rendering" $
      :> Val "as sayable info" (sez @"info") "########"
     )
 
+  it "CR13 render CaseInsensitive via Sayable" $
+    withChecklist "CR13" $
+    ("tEST TeXt" :: Named CaseInsensitive "CR13")
+    `checkValues`
+    (Empty
+     :> Val "as sayable" (sez @"test") "CR13 «test text»"
+     :> Val "as sayable info" (sez @"info") "test text"
+    )
+
+  it "CR19.1 render CaseInsensitivePreserve via Prettyprinter" $
+    withChecklist "CR19.1" $
+    fromText @(Named CaseInsensitivePreserve "CR19.1") ("test OF text" :: Text)
+    `checkValues`
+    (Empty
+     :> Val "as pretty" (show . PP.pretty) "CR19.1 «test OF text»"
+    )
+
+  it "CR19.2 render CaseInsensitive via Show" $
+    withChecklist "CR19.2" $
+    fromText @(Named CaseInsensitive "CR19.2") ("TEST OF TEXT" :: Text)
+    `checkValues`
+    (Empty
+     :> Val "as show" show "CR19.2 «test of text»"
+    )
+
 
 testSemigroup :: IO TestTree
 testSemigroup = testSpec "Named Semigroup" $
@@ -280,6 +328,16 @@ testSemigroup = testSpec "Named Semigroup" $
      :> Val "as sayable" (sez @"test") "CR22 'mo#########################re'"
     )
 
+  it "CR23 CaseInsensitivePreserve semigroup" $
+    withChecklist "CR23" $
+    (fromText @(Named CaseInsensitivePreserve "CR23") ("mORE teST TexT" :: Text)
+     <> " and STILL more")
+    `checkValues`
+    (Empty
+     :> Val "implicitly constructed full form" id "more test text and still more"
+     :> Val "as sayable" (sez @"test") "CR23 «mORE teST TexT and STILL more»"
+    )
+
 testIsList :: IO TestTree
 testIsList = testSpec "Named IsList" $
   describe "IsList of Named" $ do
@@ -295,7 +353,7 @@ testIsList = testSpec "Named IsList" $
      :> Val "as list" toList ['l','i','s','t',' ','o','f',' ','t','e','x','t']
     )
 
-  -- Note: no IsList instance for CaseInsensitive or Secure
+  -- Note: no IsList instance for CaseInsensitive or or CaseInsensitivePreserve or Secure
 
 testConversions :: IO TestTree
 testConversions = testSpec "Named Conversions" $ do
@@ -354,6 +412,19 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "style proxy" styleProxy (Proxy :: Proxy Secure)
       )
 
+    it "CR42.1 CaseInsensitivePreserve conversion" $
+      withChecklist "CR42.1" $
+      (convertName (fromText "biT OF teXt" :: Named CaseInsensitivePreserve "CR42.1")
+       :: Named CaseInsensitivePreserve "CR42.1 new")
+      `checkValues`
+      (Empty
+       :> Val "matches implicit construction" id "bit of text"
+       :> Val "as sayable" (sez @"test") "CR42.1 new «biT OF teXt»"
+       :> Val "as extracted text" nameText "biT OF teXt"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR42.1 new"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy CaseInsensitivePreserve)
+      )
+
   describe "Named style conversions" $ do
     -- n.b. these tests use the "instance ConvertNameStyle" below.
 
@@ -368,6 +439,19 @@ testConversions = testSpec "Named Conversions" $ do
        :> Val "as extracted text" nameText "some text"
        :> Val "nameOf" (\n -> nameOf n proxy#) "CR44"
        :> Val "style proxy" styleProxy (Proxy :: Proxy CaseInsensitive)
+      )
+
+    it "CR44.1 UTF8->CaseInsensitivePreserve default conversion" $
+      withChecklist "CR44.1" $
+      (convertStyle (fromText "Some TEXT" :: Name "CR44.1")
+        :: Named CaseInsensitivePreserve "CR44.1")
+      `checkValues`
+      (Empty
+       :> Val "matches implicit construction" id "some text"
+       :> Val "as sayable" (sez @"test") "CR44.1 «Some TEXT»"
+       :> Val "as extracted text" nameText "Some TEXT"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR44.1"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy CaseInsensitivePreserve)
       )
 
     it "CR45 UTF8->Secure default conversion" $
@@ -388,10 +472,23 @@ testConversions = testSpec "Named Conversions" $ do
         :: Named UTF8 "CR46")
       `checkValues`
       (Empty
-       :> Val "matches implicit construction" id "some text"
+       :> Val "matches implicit construction" id "some text" -- Note: converted to lowercase
        :> Val "as sayable" (sez @"test") "CR46 'some text'"
        :> Val "as extracted text" nameText "some text"
        :> Val "nameOf" (\n -> nameOf n proxy#) "CR46"
+       :> Val "style proxy" styleProxy (Proxy :: Proxy UTF8)
+      )
+
+    it "CR46.1 CaseInsensitivePreserve->UTF8 default conversion" $
+      withChecklist "CR46.1" $
+      (convertStyle (fromText "Some TEXT" :: Named CaseInsensitivePreserve "CR46.1")
+        :: Named UTF8 "CR46.1")
+      `checkValues`
+      (Empty
+       :> Val "matches implicit construction" id "Some TEXT"
+       :> Val "as sayable" (sez @"test") "CR46.1 'Some TEXT'"
+       :> Val "as extracted text" nameText "Some TEXT"
+       :> Val "nameOf" (\n -> nameOf n proxy#) "CR46.1"
        :> Val "style proxy" styleProxy (Proxy :: Proxy UTF8)
       )
 
@@ -425,6 +522,7 @@ instance ConvertName UTF8 "CR40" "CR40-2"
 instance ConvertName UTF8 "CR41" "CR41-3" where
   convertName = fromText . T.map succ . nameText
 instance ConvertName CaseInsensitive "CR42" "CR42 new"
+instance ConvertName CaseInsensitivePreserve "CR42.1" "CR42.1 new"
 instance ConvertName Secure "CR43" "CR43 again" where
   convertName = fromText . secureNameBypass
 
@@ -531,6 +629,9 @@ testUtilities = testSpec "Named utilities" $ do
     it "CR81 can get a CaseInsensitive length" $
       nameLength ("Length of TEXT" :: Named CaseInsensitive "CR81") `shouldBe` 14
 
+    it "CR81.1 can get a CaseInsensitivePreserve length" $
+      nameLength ("Length of TEXT" :: Named CaseInsensitivePreserve "CR81.1") `shouldBe` 14
+
     it "CR82 can get a Secure length" $
       nameLength ("Length of secure TEXT" :: Named Secure "CR82") `shouldBe` 21
 
@@ -545,8 +646,14 @@ testUtilities = testSpec "Named utilities" $ do
     it "CR85 can check a null CaseInsensitive named" $
       nullName ("" :: Named CaseInsensitive "CR85") `shouldBe` True
 
+    it "CR85.1 can check a null CaseInsensitivePreserve named" $
+      nullName ("" :: Named CaseInsensitivePreserve "CR85.1") `shouldBe` True
+
     it "CR86 can check a non-null CaseInsensitive named" $
       nullName ("Not empty" :: Named CaseInsensitive "CR86") `shouldBe` False
+
+    it "CR86.1 can check a non-null CaseInsensitivePreserve named" $
+      nullName ("Not empty" :: Named CaseInsensitivePreserve "CR86.1") `shouldBe` False
 
     it "CR87 can check a null Secure named" $
       nullName ("" :: Name "CR87") `shouldBe` True
@@ -692,7 +799,7 @@ testJSON = testSpec "Named JSON style" $ do
           :> Val "decoded" decode (Just obj)
          )
 
-    it "CR104 JSON of record containing CaseInsensitive Named is not necessarily round-robin" $
+    it "CR104 JSON of record containing CaseInsensitive Named is not necessarily round-robin but CaseInsensitivePreserve is" $
       withChecklist "CR104" $
       let obj = Info "John Henry" "Railroad Worker" "Hammer Master"
       in encode (toJSON obj)
@@ -703,7 +810,8 @@ testJSON = testSpec "Named JSON style" $ do
           :> Val "decoded" decode (Just $ obj { title = fromText $ T.toLower $ nameText $ title obj })
          )
 
-data Info = Info { name :: Name "name"
+
+data Info = Info { name :: Named CaseInsensitivePreserve "name"
                  , title :: Named CaseInsensitive "title"
                  , desc :: Name "description"
                  }

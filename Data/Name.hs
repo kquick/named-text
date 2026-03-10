@@ -143,6 +143,7 @@ module Data.Name
 
     -- * Case Insensitive Names
   , CaseInsensitive
+  , CaseInsensitivePreserve
 
     -- * Secure Names
   , Secure
@@ -161,7 +162,8 @@ module Data.Name
 )
 where
 
-import           Data.Hashable ( Hashable )
+import           Data.Function ( on )
+import           Data.Hashable ( Hashable, hash )
 import           Data.Proxy ( Proxy(Proxy) )
 import           Data.String ( IsString(fromString) )
 import           Data.Text ( Text )
@@ -390,8 +392,13 @@ deriving instance Hashable (Named UTF8 nameOf)
 -- * CaseInsensitive Named objects
 
 -- | The CaseInsensitive style of Named objects will allow case-insensitive ASCII
--- comparisons between objects.  On creation, all text is converted to lowercase,
--- so the original input case is not preserved on extraction or rendering.
+-- comparisons between objects.
+--
+-- On creation, all text is converted to lowercase, so the original input case is
+-- not preserved on extraction or rendering.  This helps ensure that any
+-- comparisons or substitutions outside of the Named object maintain the
+-- "equality" perspective of the names; if the original casing should be
+-- preserved, see 'CaseInsensitivePreserve' instead.
 
 type CaseInsensitive = "CaseInsensitive" :: NameStyle
 
@@ -419,6 +426,48 @@ instance ConvertNameStyle UTF8 CaseInsensitive nameTy
 deriving instance Eq (Named CaseInsensitive nameOf)
 deriving instance Ord (Named CaseInsensitive nameOf)
 deriving instance Hashable (Named CaseInsensitive nameOf)
+
+----------------------------------------------------------------------
+-- * CaseInsensitivePreserve Named objects
+
+-- | The CaseInsensitivePreserve style of Named objects will allow
+-- case-insensitive ASCII comparisons between objects, but only for the Named
+-- objects.
+--
+-- On creation, the original case of the text is preserved, but the Eq and Ord
+-- instances for this style will ignore case when making their determination.
+-- This only holds for the Named object: the extracted text will be in the
+-- original case and naieve equality or ordinal comparisons of the extracted text
+-- will not have the same case-insensitive results; for a more orthogonal
+-- handling, see the 'CaseInsensitive' style.
+
+type CaseInsensitivePreserve = "CaseInsensitive/Preserve" :: NameStyle
+
+instance {-# OVERLAPPING #-} IsString (Named CaseInsensitivePreserve nameOf) where
+  fromString = Named . fromString
+
+instance KnownSymbol ty => PP.Pretty (Named CaseInsensitivePreserve ty) where
+  pretty nm = (PP.pretty $ nameOf nm proxy#)
+              <+> PP.surround (PP.pretty (nameText nm)) "«" "»"
+
+instance NameText CaseInsensitivePreserve
+
+
+instance ConvertNameStyle UTF8 CaseInsensitivePreserve nameTy
+instance ConvertNameStyle CaseInsensitivePreserve UTF8 nameTy
+
+instance ConvertNameStyle CaseInsensitive CaseInsensitivePreserve nameTy
+-- No ConvertNameStyle is defined for CaseInsensitivePreserve ->
+-- CaseInsensitivePreserve because this cannot be round-tripped.
+
+instance Eq (Named CaseInsensitivePreserve nameOf) where
+  (==) = (==) `on` (T.toLower . nameText)
+
+instance Ord (Named CaseInsensitivePreserve nameOf) where
+  compare = compare `on` (T.toLower . nameText)
+
+instance Hashable (Named CaseInsensitivePreserve nameOf) where
+  hash = hash . T.toLower . nameText
 
 
 ----------------------------------------------------------------------

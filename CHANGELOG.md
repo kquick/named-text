@@ -1,5 +1,11 @@
 # Revision history for named-text
 
+## 1.2.3.0 -- 2026-03-10
+
+* Added CaseInsensitivePreserve style, which functions similarly to
+  CaseInsensitive style in that it performs comparisons in a case insensitive
+  manner, but it stores and divulges the text in the original case.
+
 ## 1.2.2.0 -- 2024-10-26
 
 * Allow building with GHC 9.12.

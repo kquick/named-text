@@ -1,0 +1,13 @@
+release
+  prep =
+    in dir = {TopDir}
+    exec =
+      sed -i -e "/^version:/s/:[ \t]*.*\$/: ${NEWVERSION}/" named-text.cabal
+      git tag -s -m "Version ${NEWVERSION}" v${NEWVERSION}
+      cabal sdist
+      echo git push origin
+      echo git push origin --tags
+      echo cabal upload dist-newstyle/sdist/*.tar.gz
+  post
+    in dir = {TopDir}
+    exec = sed -i -e '/^version:/s/$/.99/' named-text.cabal

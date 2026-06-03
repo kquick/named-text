@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1765117877,
-        "narHash": "sha256-Fzy3US4MdP/gAre2N0Dn4Dz+RirWVPfPO8VPNbsIjj0=",
+        "lastModified": 1768050190,
+        "narHash": "sha256-xjWlwQpodI/YA/92fFjWAM7MQeUjNkP6FIUv8RyT41g=",
         "owner": "kquick",
         "repo": "nix-levers",
-        "rev": "d4ffbdf56387ee5ffb6ae3aed176f37f56769948",
+        "rev": "1ba59d23c84bf0699b4a82ffcf154ec832ffabeb",
         "type": "github"
       },
       "original": {
@@ -20,13 +20,29 @@
         "type": "github"
       }
     },
+    "microlens-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1758506353,
+        "narHash": "sha256-m4qQXZcHffx1OW1a6JVX3d/XzfSL9cFcTUR+O8yyFYo=",
+        "owner": "stevenfontanella",
+        "repo": "microlens",
+        "rev": "7d509d465c54dba45b182f9c60452b3b3aa71d1a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "stevenfontanella",
+        "repo": "microlens",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1761349956,
-        "narHash": "sha256-tH3wHnOJms+U4k/rK2Nn1RfBrhffX92jLP/2VndSn0w=",
+        "lastModified": 1780336545,
+        "narHash": "sha256-vhVhuXzFrIOfcssC/9hDHx7MHzDKjF3keHuREOQqQiQ=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "02f2cb8e0feb4596d20cc52fda73ccee960e3538",
+        "rev": "4df1b885d76a54e1aa1a318f8d16fd6005b6401f",
         "type": "github"
       },
       "original": {
@@ -39,11 +55,11 @@
     "parameterized-utils-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1757597308,
-        "narHash": "sha256-fwZLglQthgfdd/MvCU1b6zpGHTpYPVVxnd85Yvd6gH4=",
+        "lastModified": 1778190350,
+        "narHash": "sha256-IY58yJYau4G1u1GLk1KSKgigEZFXfO+LkQobxOSyIbM=",
         "owner": "galoisinc",
         "repo": "parameterized-utils",
-        "rev": "ebd59241828a97e06af6f8eeead0968a90108256",
+        "rev": "347810381eee9417a6cdf738be4deef488e3ff1b",
         "type": "github"
       },
       "original": {
@@ -55,6 +71,7 @@
     "root": {
       "inputs": {
         "levers": "levers",
+        "microlens-src": "microlens-src",
         "nixpkgs": "nixpkgs",
         "parameterized-utils-src": "parameterized-utils-src",
         "sayable": "sayable",
@@ -71,11 +88,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1762015650,
-        "narHash": "sha256-WF4ME1iNNpuD8lT+HyPBaL4GXfjQK3n4v4k/XyYytFQ=",
+        "lastModified": 1767578011,
+        "narHash": "sha256-XHABeHA9Ca8+X88kdSP0g+tyQExScPgOqrEfC7jmEIY=",
         "owner": "kquick",
         "repo": "sayable",
-        "rev": "251b6533971a5395fdb42d3d23df601b957a80a2",
+        "rev": "24a600ee82f855329b1dc0a6ba9106ec46215b7a",
         "type": "github"
       },
       "original": {
@@ -89,6 +106,9 @@
         "levers": [
           "levers"
         ],
+        "microlens-src": [
+          "microlens-src"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -97,11 +117,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1761568218,
-        "narHash": "sha256-9Qgmzeq25XeysQs/7U9nTfmRO4H3cuAueR9TWv40viw=",
+        "lastModified": 1778241747,
+        "narHash": "sha256-mwZjo4gbvChEOaFlOWROt9IRfnDtoYHWl495val3BH4=",
         "owner": "kquick",
         "repo": "tasty-checklist",
-        "rev": "1022211d94f9713c4c87327a1a008d19955d03b9",
+        "rev": "75eace97f0b8cface6f4545b63055b3e0084c166",
         "type": "github"
       },
       "original": {

@@ -89,7 +89,7 @@ test-suite namedTests
     build-depends:    base
                     , hspec
                     , named-text
-                    , parameterized-utils >= 2.1 && < 2.2
+                    , parameterized-utils >= 2.1 && < 2.4
                     , prettyprinter
                     , sayable
                     , tasty >= 1.4 && < 1.6

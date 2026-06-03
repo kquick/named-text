@@ -9,24 +9,30 @@
       url = "github:kquick/nix-levers";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    sayable = {
-      url = "github:kquick/sayable";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.levers.follows = "levers";
+    microlens-src = {
+      url = "github:stevenfontanella/microlens";
+      flake = false;
     };
     parameterized-utils-src = {
       url = "github:galoisinc/parameterized-utils";
       flake = false;
     };
+    sayable = {
+      url = "github:kquick/sayable";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.levers.follows = "levers";
+    };
     tasty-checklist = {
       url = "github:kquick/tasty-checklist";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.levers.follows = "levers";
+      inputs.microlens-src.follows = "microlens-src";
       inputs.parameterized-utils-src.follows = "parameterized-utils-src";
     };
   };
 
   outputs = { self, levers, nixpkgs
+            , microlens-src
             , parameterized-utils-src
             , tasty-checklist
             , sayable }:
@@ -44,13 +50,14 @@
           pkgs = import nixpkgs { inherit system; };
         in rec {
           default = named-text;
+          microlens = mkHaskell "microlens" "${microlens-src}/microlens" {};
           named-text = mkHaskell "named-text" self {
             inherit parameterized-utils;
             inherit sayable;
             inherit tasty-checklist;
           };
           parameterized-utils = mkHaskell "parameterized-utils"
-            parameterized-utils-src {};
+            parameterized-utils-src { inherit microlens; };
         });
     };
 }

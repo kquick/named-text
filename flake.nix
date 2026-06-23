@@ -55,9 +55,15 @@
             inherit parameterized-utils;
             inherit sayable;
             inherit tasty-checklist;
+            adjustDrv = levers.haskellUnbounded pkgs ["ghc914"] ["tasty-hspec"];
           };
           parameterized-utils = mkHaskell "parameterized-utils"
-            parameterized-utils-src { inherit microlens; };
+            parameterized-utils-src {
+              inherit microlens;
+              adjustDrv = levers.haskellUnbounded pkgs
+                ["ghc914"]
+                ["hedgehog-classes"];
+            };
         });
     };
 }

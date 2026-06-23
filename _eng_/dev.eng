@@ -12,6 +12,11 @@ dev
        cabal_test
          exec = cabal test {TestName}
 
+   flake_update =
+      Update flake dependencies =
+        in dir = {TopDir}
+        exec = nix flake update --option tarball-ttl 60
+
    nixbuild:old
      Uses nix to build with old GHC versions
        in dir = {TopDir}
@@ -28,7 +33,7 @@ dev
    nixbuild
      Uses nix to build with current GHC versions
        in dir = {TopDir}
-       exec = nix build --no-link $(for X in 910 912 ; do echo ".#named-text.ghc$X"; done)
+       exec = nix build --no-link $(for X in 910 912 914 ; do echo ".#named-text.ghc$X"; done)
    nixbuild:all =
      Uses nix to build with all supported GHC versions =
        in dir = {TopDir}

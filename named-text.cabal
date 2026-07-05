@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               named-text
-version:            1.2.3.0
+version:            1.2.4.0
 synopsis:           A parameterized named text type and associated functionality.
 description:
   .
@@ -73,6 +73,7 @@ library
                     , hashable
                     , prettyprinter >= 1.7.0 && < 1.8
                     , sayable >= 1.0 && < 1.3
+                    , template-haskell
                     , text
     exposed-modules:  Data.Name
     other-modules:    Data.Name.Internal

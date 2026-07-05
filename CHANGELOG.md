@@ -1,5 +1,12 @@
 # Revision history for named-text
 
+## 1.2.4.0 -- 2026-07.04
+
+* Allow building with GHC 9.14.
+
+* Added Language.Haskell.TH.Syntax.Lift instance for Named, allowing it to be
+  used in Template Haskell splices.
+
 ## 1.2.3.0 -- 2026-03-10
 
 * Added CaseInsensitivePreserve style, which functions similarly to

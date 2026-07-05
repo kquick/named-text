@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 
@@ -10,6 +11,8 @@ import Data.Text ( Text )
 import GHC.Generics ( Generic )
 import GHC.TypeLits
 
+import Language.Haskell.TH.Syntax ( Lift )
+
 
 -- | The 'Named' is a wrapper around any 'Data.Text' that identifies the type of
 -- 'Data.Text' via the @nameOf@ phantom symbol type, as well as a usage specified
@@ -17,7 +20,7 @@ import GHC.TypeLits
 -- using a raw 'Data.Text' (or 'String').
 
 newtype Named (style :: NameStyle) (nameOf :: Symbol) = Named { named :: Text }
-  deriving (Generic, NFData, Semigroup)
+  deriving (Generic, NFData, Semigroup, Lift)
 
 
 -- | The NameStyle specifies how the name itself is styled.

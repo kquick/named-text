@@ -159,9 +159,13 @@ module Data.Name
     -- * Utility operations
   , nameLength
   , nullName
+  , isPrefixOf
+  , isSuffixOf
+  , isInfixOf
 )
 where
 
+import           Data.Bool ( bool )
 import           Data.Function ( on )
 import           Data.Hashable ( Hashable, hash )
 import           Data.Proxy ( Proxy(Proxy) )
@@ -319,6 +323,35 @@ nameLength = toEnum . T.length . named
 
 nullName :: Named style nm -> Bool
 nullName = T.null . named
+
+isPrefixOf, isSuffixOf, isInfixOf :: Eq (Named sty nameOf)
+                                  => Named sty nameOf -> Named sty nameOf
+                                  -> Bool
+
+-- | O(n) Returns true if the first name is a prefix of the second.
+isPrefixOf pfx full =
+  pfx == (Named $ T.take (fromEnum $ nameLength pfx) $ named full)
+
+-- | O(n) Returns true if the first name is a suffix of the second.
+isSuffixOf sfx full =
+  let fL = nameLength full
+      sL = nameLength sfx
+  in case T.compareLength (named sfx) (fromEnum fL) of
+       GT -> False  -- suffix is longer than target name
+       _ -> sfx == (Named $ T.drop (fromEnum $ fL - sL) $ named full)
+
+-- | O(n) Returns true if the first name is contained in the second.
+isInfixOf ifx full =
+  let fL = nameLength full
+      ifL = nameLength ifx
+      checkAt x = flip bool True
+                  $ ifx == (Named
+                            $ T.take (fromEnum ifL)
+                            $ T.drop (fromEnum x)
+                            $ named full)
+  in case T.compareLength (named ifx) (fromEnum fL) of
+       GT -> False -- infix is longer than target name
+       _ -> foldr checkAt False [0 .. fL - ifL ]
 
 
 ----------------------------------------------------------------------

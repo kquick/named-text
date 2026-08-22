@@ -1,6 +1,9 @@
 # Revision history for named-text
 
 ## 1.2.4.0 -- 2026-07.04
+## 1.2.5.0 -- 2026-08-22
+
+* Added `isPrefixOf`, `isSuffixOf`, and `isInfixOf`.
 
 * Allow building with GHC 9.14.
 

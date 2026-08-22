@@ -1266,6 +1266,29 @@ testUtilities = testSpec "Named utilities" $ do
        `isInfixOf`
        ("stuff" :: Named HTMLStyle "CR356"))
       `shouldBe` False
+
+  describe "Name take and drop" $ do
+
+    let sampleInp = "take and drop" :: Name "t&d"
+
+    it "CR360 can take nothing" $ do
+      nameTake 0 sampleInp `shouldBe` fromText ""
+
+    it "CR361 can take everything" $ do
+      nameTake (nameLength sampleInp) sampleInp `shouldBe` sampleInp
+
+    it "CR362 can take some" $ do
+      nameTake 3 sampleInp `shouldBe` "tak"
+
+    it "CR370 can drop nothing" $ do
+      nameDrop 0 sampleInp `shouldBe` sampleInp
+
+    it "CR371 can drop everything" $ do
+      nameDrop (nameLength sampleInp) sampleInp `shouldBe` fromText ""
+
+    it "CR372 can drop some" $ do
+      nameDrop 3 sampleInp `shouldBe` fromText "e and drop"
+
 ----------------------------------------------------------------------
 -- Data.Name.JSON
 

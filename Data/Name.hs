@@ -159,6 +159,8 @@ module Data.Name
     -- * Utility operations
   , nameLength
   , nullName
+  , nameDrop
+  , nameTake
   , isPrefixOf
   , isSuffixOf
   , isInfixOf
@@ -323,6 +325,12 @@ nameLength = toEnum . T.length . named
 
 nullName :: Named style nm -> Bool
 nullName = T.null . named
+
+nameDrop :: Natural -> Named style nm -> Named style nm
+nameDrop cnt = Named . T.drop (fromEnum cnt) . named
+
+nameTake :: Natural -> Named style nm -> Named style nm
+nameTake cnt = Named . T.take (fromEnum cnt) . named
 
 isPrefixOf, isSuffixOf, isInfixOf :: Eq (Named sty nameOf)
                                   => Named sty nameOf -> Named sty nameOf

@@ -3,6 +3,8 @@
 ## 1.2.5.0 -- 2026-08-22
 
 * Added `isPrefixOf`, `isSuffixOf`, and `isInfixOf`.
+* Added `nameTake` and `nameDrop`, which function similarly to `Text.take` and
+  `Text.drop`.
 * Updated `CaseInsensitivePreserve` implementation internally to use `toCaseFold`
   instead of `toCaseLower` for various operations.  This should have no impact
   but _may_ change the behavior of `Eq`, `Ord`, or `Hashable` operations.*

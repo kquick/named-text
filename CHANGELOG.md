@@ -1,9 +1,14 @@
 # Revision history for named-text
 
-## 1.2.4.0 -- 2026-07.04
 ## 1.2.5.0 -- 2026-08-22
 
 * Added `isPrefixOf`, `isSuffixOf`, and `isInfixOf`.
+* Updated `CaseInsensitivePreserve` implementation internally to use `toCaseFold`
+  instead of `toCaseLower` for various operations.  This should have no impact
+  but _may_ change the behavior of `Eq`, `Ord`, or `Hashable` operations.*
+* Internal optimizations.
+
+## 1.2.4.0 -- 2026-07-04
 
 * Allow building with GHC 9.14.
 

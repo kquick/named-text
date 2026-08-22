@@ -494,13 +494,13 @@ instance ConvertNameStyle CaseInsensitive CaseInsensitivePreserve nameTy
 -- CaseInsensitivePreserve because this cannot be round-tripped.
 
 instance Eq (Named CaseInsensitivePreserve nameOf) where
-  (==) = (==) `on` (T.toLower . nameText)
+  (==) = (==) `on` (T.toCaseFold . nameText)
 
 instance Ord (Named CaseInsensitivePreserve nameOf) where
-  compare = compare `on` (T.toLower . nameText)
+  compare = compare `on` (T.toCaseFold . nameText)
 
 instance Hashable (Named CaseInsensitivePreserve nameOf) where
-  hash = hash . T.toLower . nameText
+  hash = hash . T.toCaseFold . nameText
 
 
 ----------------------------------------------------------------------
@@ -526,11 +526,12 @@ type SecureName = Named Secure
 -- be used instead.
 
 secureName :: Named Secure nameOf -> Text
-secureName nm = if T.length (named nm) < 5
-                then T.replicate 8 "#"
-                else ((T.take 2 $ named nm)
-                      <> T.replicate (T.length (named nm) - 4) "#"
-                      <> T.reverse (T.take 2 $ T.reverse $ named nm))
+secureName nm =
+  case T.compareLength (named nm) 5 of
+    LT -> T.replicate 8 "#"
+    _ -> ((T.take 2 $ named nm)
+           <> T.replicate (T.length (named nm) - 4) "#"
+           <> T.reverse (T.take 2 $ T.reverse $ named nm))
 
 
 -- | The secureNameBypass accessor is used to obtain the raw Text from a Secure

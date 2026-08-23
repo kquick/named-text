@@ -45,6 +45,11 @@ deriving instance Eq (Named JSONStyle nameOf)
 deriving instance Ord (Named JSONStyle nameOf)
 deriving instance Hashable (Named JSONStyle nameOf)
 
+-- However, since a JSON entity is structured, it is highly unlikely that the
+-- NameUtilities operations will be valid (especially since JSON is whitespace-
+-- and mostly order- insensitive and therefore may have multiple
+-- representations), so NameUtilities are NOT defined for JSONStyle.
+
 instance ConvertNameStyle JSONStyle UTF8 nameOf
 instance ConvertNameStyle UTF8 JSONStyle nameOf
 

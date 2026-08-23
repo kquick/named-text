@@ -664,72 +664,72 @@ testUtilities = testSpec "Named utilities" $ do
   describe "Name prefix check" $ do
 
     it "CR110 can check a null prefix of a null UTF8" $
-      (("" :: Name "CR110") `isPrefixOf` ("" :: Name "CR110")) `shouldBe` True
+      (("" :: Name "CR110") `isPrefixOfName` ("" :: Name "CR110")) `shouldBe` True
 
     it "CR111 can check a null prefix UTF8" $
-      (("" :: Name "CR111") `isPrefixOf` ("stuff" :: Name "CR111"))
+      (("" :: Name "CR111") `isPrefixOfName` ("stuff" :: Name "CR111"))
       `shouldBe` True
 
     it "CR112 can check a valid prefix UTF8" $
-      (("st" :: Name "CR112") `isPrefixOf` ("stuff" :: Name "CR112"))
+      (("st" :: Name "CR112") `isPrefixOfName` ("stuff" :: Name "CR112"))
       `shouldBe` True
 
     it "CR113 can check a long multi-word prefix UTF8" $
       (("This is a\n\t prefix" :: Name "CR113")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("This is a\n\t prefix!" :: Name "CR113")) `shouldBe` True
 
     it "CR114 rejects an invalid prefix UTF8" $
-      (("bad" :: Name "CR114") `isPrefixOf` ("stuff" :: Name "CR114"))
+      (("bad" :: Name "CR114") `isPrefixOfName` ("stuff" :: Name "CR114"))
       `shouldBe` False
 
     it "CR115 rejects an too-long prefix UTF8" $
-      (("stuffing" :: Name "CR115") `isPrefixOf` ("stuff" :: Name "CR115"))
+      (("stuffing" :: Name "CR115") `isPrefixOfName` ("stuff" :: Name "CR115"))
       `shouldBe` False
 
     it "CR116 rejects an case mismatch UTF8" $
-      (("STUFF" :: Name "CR116") `isPrefixOf` ("stuff" :: Name "CR116"))
+      (("STUFF" :: Name "CR116") `isPrefixOfName` ("stuff" :: Name "CR116"))
       `shouldBe` False
 
     -----------------------------
 
     it "CR120 can check a null prefix of a null CaseInsensitive" $
       (("" :: Named CaseInsensitive "CR120")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("" :: Named CaseInsensitive "CR120")) `shouldBe` True
 
     it "CR121 can check a null prefix CaseInsensitive" $
       (("" :: Named CaseInsensitive "CR121")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("stuff" :: Named CaseInsensitive "CR121"))
       `shouldBe` True
 
     it "CR122 can check a valid prefix CaseInsensitive" $
       (("sT" :: Named CaseInsensitive "CR122")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("Stuff" :: Named CaseInsensitive "CR122"))
       `shouldBe` True
 
     it "CR123 can check a long multi-word prefix CaseInsensitive" $
       (("This is A\n\t prefix" :: Named CaseInsensitive "CR123")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("This is a\n\t Prefix!" :: Named CaseInsensitive "CR123"))
       `shouldBe` True
 
     it "CR124 rejects an invalid prefix CaseInsensitive" $
       (("bad" :: Named CaseInsensitive "CR124")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("stuff" :: Named CaseInsensitive "CR124"))
       `shouldBe` False
 
     it "CR125 rejects an too-long prefix CaseInsensitive" $
       (("stuffing" :: Named CaseInsensitive "CR125")
-       `isPrefixOf` ("stuff" :: Named CaseInsensitive "CR125"))
+       `isPrefixOfName` ("stuff" :: Named CaseInsensitive "CR125"))
       `shouldBe` False
 
     it "CR126 accepts a case mismatch UTF8" $
       (("STUFF" :: Named CaseInsensitive "CR126")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("stuff" :: Named CaseInsensitive "CR126"))
       `shouldBe` True
 
@@ -737,197 +737,131 @@ testUtilities = testSpec "Named utilities" $ do
 
     it "CR130 can check a null prefix of a null CaseInsensitivePreserve" $
       (("" :: Named CaseInsensitivePreserve "CR130")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("" :: Named CaseInsensitivePreserve "CR130")) `shouldBe` True
 
     it "CR131 can check a null prefix CaseInsensitivePreserve" $
       (("" :: Named CaseInsensitivePreserve "CR131")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("stuff" :: Named CaseInsensitivePreserve "CR131"))
       `shouldBe` True
 
     it "CR132 can check a valid prefix CaseInsensitivePreserve" $
       (("sT" :: Named CaseInsensitivePreserve "CR132")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("Stuff" :: Named CaseInsensitivePreserve "CR132"))
       `shouldBe` True
 
     it "CR133 can check a long multi-word prefix CaseInsensitivePreserve" $
       (("This is A\n\t prefix" :: Named CaseInsensitivePreserve "CR133")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("This is a\n\t Prefix!" :: Named CaseInsensitivePreserve "CR133"))
       `shouldBe` True
 
     it "CR134 rejects an invalid prefix CaseInsensitivePreserve" $
       (("bad" :: Named CaseInsensitivePreserve "CR134")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("stuff" :: Named CaseInsensitivePreserve "CR134"))
       `shouldBe` False
 
     it "CR135 rejects an too-long prefix CaseInsensitivePreserve" $
       (("stuffing" :: Named CaseInsensitivePreserve "CR135")
-       `isPrefixOf` ("stuff" :: Named CaseInsensitivePreserve "CR135"))
+       `isPrefixOfName` ("stuff" :: Named CaseInsensitivePreserve "CR135"))
       `shouldBe` False
 
     it "CR136 accepts a case mismatch UTF8" $
       (("STUFF" :: Named CaseInsensitivePreserve "CR136")
-       `isPrefixOf`
+       `isPrefixOfName`
        ("stuff" :: Named CaseInsensitivePreserve "CR136"))
       `shouldBe` True
 
     -----------------------------
+    -- n.b. These would cause a type error because NameUtilities are not defined
+    -- for Secure.
 
-    it "CR140 can check a null prefix of a null Secure" $
-      (("" :: Named Secure "CR140")
-       `isPrefixOf`
-       ("" :: Named Secure "CR140")) `shouldBe` True
-
-    it "CR141 can check a null prefix Secure" $
-      (("" :: Named Secure "CR141")
-       `isPrefixOf`
-       ("stuff" :: Named Secure "CR141"))
-      `shouldBe` True
-
-    it "CR142 can check a valid prefix Secure" $
-      (("St" :: Named Secure "CR142")
-       `isPrefixOf`
-       ("Stuff" :: Named Secure "CR142"))
-      `shouldBe` True
-
-    it "CR143 can check a long multi-word prefix Secure" $
-      (("This is a\n\t Prefix" :: Named Secure "CR143")
-       `isPrefixOf`
-       ("This is a\n\t Prefix!" :: Named Secure "CR143"))
-      `shouldBe` True
-
-    it "CR144 rejects an invalid prefix Secure" $
-      (("bad" :: Named Secure "CR144")
-       `isPrefixOf`
-       ("stuff" :: Named Secure "CR144"))
-      `shouldBe` False
-
-    it "CR145 rejects an too-long prefix Secure" $
-      (("stuffing" :: Named Secure "CR145")
-       `isPrefixOf` ("stuff" :: Named Secure "CR145"))
-      `shouldBe` False
-
-    it "CR146 accepts a case mismatch UTF8" $
-      (("STUFF" :: Named Secure "CR146")
-       `isPrefixOf`
-       ("stuff" :: Named Secure "CR146"))
-      `shouldBe` False
+    -- it "CR140 can check a null prefix of a null Secure" $
+    --   (("" :: Named Secure "CR140")
+    --    `isPrefixOfName`
+    --    ("" :: Named Secure "CR140")) `shouldBe` True
 
     -----------------------------
+    -- n.b. These would cause a type error because NameUtilities are not defined
+    -- for HTMLStyle.
 
-    it "CR150 can check a null prefix of a null HTMLStyle" $
-      (("" :: Named HTMLStyle "CR150")
-       `isPrefixOf`
-       ("" :: Named HTMLStyle "CR150")) `shouldBe` True
-
-    it "CR151 can check a null prefix HTMLStyle" $
-      (("" :: Named HTMLStyle "CR151")
-       `isPrefixOf`
-       ("stuff" :: Named HTMLStyle "CR151"))
-      `shouldBe` True
-
-    it "CR152 can check a valid prefix HTMLStyle" $
-      (("St" :: Named HTMLStyle "CR152")
-       `isPrefixOf`
-       ("Stuff" :: Named HTMLStyle "CR152"))
-      `shouldBe` True
-
-    it "CR153 can check a long multi-word prefix HTMLStyle" $
-      (("This & that is <a\n\t \"Prefix'>" :: Named HTMLStyle "CR153")
-       `isPrefixOf`
-       ("This & that is <a\n\t \"Prefix'>>" :: Named HTMLStyle "CR153"))
-      `shouldBe` True
-
-    it "CR154 rejects an invalid prefix HTMLStyle" $
-      (("bad" :: Named HTMLStyle "CR154")
-       `isPrefixOf`
-       ("stuff" :: Named HTMLStyle "CR154"))
-      `shouldBe` False
-
-    it "CR155 rejects an too-long prefix HTMLStyle" $
-      (("stuffing" :: Named HTMLStyle "CR155")
-       `isPrefixOf` ("stuff" :: Named HTMLStyle "CR155"))
-      `shouldBe` False
-
-    it "CR156 accepts a case mismatch UTF8" $
-      (("STUFF" :: Named HTMLStyle "CR156")
-       `isPrefixOf`
-       ("stuff" :: Named HTMLStyle "CR156"))
-      `shouldBe` False
+    -- it "CR150 can check a null prefix of a null HTMLStyle" $
+    --   (("" :: Named HTMLStyle "CR150")
+    --    `isPrefixOfName`
+    --    ("" :: Named HTMLStyle "CR150")) `shouldBe` True
 
   describe "Name suffix check" $ do
 
     it "CR210 can check a null suffix of a null UTF8" $
-      (("" :: Name "CR210") `isSuffixOf` ("" :: Name "CR210")) `shouldBe` True
+      (("" :: Name "CR210") `isSuffixOfName` ("" :: Name "CR210")) `shouldBe` True
 
     it "CR211 can check a null suffix UTF8" $
-      (("" :: Name "CR211") `isSuffixOf` ("stuff" :: Name "CR211"))
+      (("" :: Name "CR211") `isSuffixOfName` ("stuff" :: Name "CR211"))
       `shouldBe` True
 
     it "CR212 can check a valid suffix UTF8" $
-      (("uff" :: Name "CR212") `isSuffixOf` ("stuff" :: Name "CR212"))
+      (("uff" :: Name "CR212") `isSuffixOfName` ("stuff" :: Name "CR212"))
       `shouldBe` True
 
     it "CR213 can check a long multi-word suffix UTF8" $
       (("!" :: Name "CR213")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("This is a\n\t suffix!" :: Name "CR213")) `shouldBe` True
 
     it "CR214 rejects an invalid suffix UTF8" $
-      (("bad" :: Name "CR214") `isSuffixOf` ("stuff" :: Name "CR214"))
+      (("bad" :: Name "CR214") `isSuffixOfName` ("stuff" :: Name "CR214"))
       `shouldBe` False
 
     it "CR215 rejects an too-long suffix UTF8" $
-      (("stuffing" :: Name "CR215") `isSuffixOf` ("stuff" :: Name "CR215"))
+      (("stuffing" :: Name "CR215") `isSuffixOfName` ("stuff" :: Name "CR215"))
       `shouldBe` False
 
     it "CR216 rejects an case mismatch UTF8" $
-      (("STUFF" :: Name "CR216") `isSuffixOf` ("stuff" :: Name "CR216"))
+      (("STUFF" :: Name "CR216") `isSuffixOfName` ("stuff" :: Name "CR216"))
       `shouldBe` False
 
     -----------------------------
 
     it "CR220 can check a null suffix of a null CaseInsensitive" $
       (("" :: Named CaseInsensitive "CR220")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("" :: Named CaseInsensitive "CR220")) `shouldBe` True
 
     it "CR221 can check a null suffix CaseInsensitive" $
       (("" :: Named CaseInsensitive "CR221")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("stuff" :: Named CaseInsensitive "CR221"))
       `shouldBe` True
 
     it "CR222 can check a valid suffix CaseInsensitive" $
       (("Uff" :: Named CaseInsensitive "CR222")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("Stuff" :: Named CaseInsensitive "CR222"))
       `shouldBe` True
 
     it "CR223 can check a long multi-word suffix CaseInsensitive" $
       (("This is A\n\t suffix!" :: Named CaseInsensitive "CR223")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("This is a\n\t Suffix!" :: Named CaseInsensitive "CR223"))
       `shouldBe` True
 
     it "CR224 rejects an invalid suffix CaseInsensitive" $
       (("bad" :: Named CaseInsensitive "CR224")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("stuff" :: Named CaseInsensitive "CR224"))
       `shouldBe` False
 
     it "CR225 rejects an too-long suffix CaseInsensitive" $
       (("stuffing" :: Named CaseInsensitive "CR225")
-       `isSuffixOf` ("stuff" :: Named CaseInsensitive "CR225"))
+       `isSuffixOfName` ("stuff" :: Named CaseInsensitive "CR225"))
       `shouldBe` False
 
     it "CR226 accepts a case mismatch UTF8" $
       (("STUFF" :: Named CaseInsensitive "CR226")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("stuff" :: Named CaseInsensitive "CR226"))
       `shouldBe` True
 
@@ -935,209 +869,143 @@ testUtilities = testSpec "Named utilities" $ do
 
     it "CR230 can check a null suffix of a null CaseInsensitivePreserve" $
       (("" :: Named CaseInsensitivePreserve "CR230")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("" :: Named CaseInsensitivePreserve "CR230")) `shouldBe` True
 
     it "CR231 can check a null suffix CaseInsensitivePreserve" $
       (("" :: Named CaseInsensitivePreserve "CR231")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("stuff" :: Named CaseInsensitivePreserve "CR231"))
       `shouldBe` True
 
     it "CR232 can check a valid suffix CaseInsensitivePreserve" $
       (("uFf" :: Named CaseInsensitivePreserve "CR232")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("Stuff" :: Named CaseInsensitivePreserve "CR232"))
       `shouldBe` True
 
     it "CR233 can check a long multi-word suffix CaseInsensitivePreserve" $
       ((" A\n\t suffix!" :: Named CaseInsensitivePreserve "CR233")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("This is a\n\t Suffix!" :: Named CaseInsensitivePreserve "CR233"))
       `shouldBe` True
 
     it "CR234 rejects an invalid suffix CaseInsensitivePreserve" $
       (("bad" :: Named CaseInsensitivePreserve "CR234")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("stuff" :: Named CaseInsensitivePreserve "CR234"))
       `shouldBe` False
 
     it "CR235 rejects an too-long suffix CaseInsensitivePreserve" $
       (("stuffing" :: Named CaseInsensitivePreserve "CR235")
-       `isSuffixOf` ("stuff" :: Named CaseInsensitivePreserve "CR235"))
+       `isSuffixOfName` ("stuff" :: Named CaseInsensitivePreserve "CR235"))
       `shouldBe` False
 
     it "CR236 accepts a case mismatch UTF8" $
       (("STUFF" :: Named CaseInsensitivePreserve "CR236")
-       `isSuffixOf`
+       `isSuffixOfName`
        ("stuff" :: Named CaseInsensitivePreserve "CR236"))
       `shouldBe` True
 
     -----------------------------
+    -- n.b. These would cause a type error because NameUtilities are not defined
+    -- for Secure.
 
-    it "CR240 can check a null suffix of a null Secure" $
-      (("" :: Named Secure "CR240")
-       `isSuffixOf`
-       ("" :: Named Secure "CR240")) `shouldBe` True
-
-    it "CR241 can check a null suffix Secure" $
-      (("" :: Named Secure "CR241")
-       `isSuffixOf`
-       ("stuff" :: Named Secure "CR241"))
-      `shouldBe` True
-
-    it "CR242 can check a valid suffix Secure" $
-      (("f" :: Named Secure "CR242")
-       `isSuffixOf`
-       ("Stuff" :: Named Secure "CR242"))
-      `shouldBe` True
-
-    it "CR243 can check a long multi-word suffix Secure" $
-      ((" Suffix!" :: Named Secure "CR243")
-       `isSuffixOf`
-       ("This is a\n\t Suffix!" :: Named Secure "CR243"))
-      `shouldBe` True
-
-    it "CR244 rejects an invalid suffix Secure" $
-      (("bad" :: Named Secure "CR244")
-       `isSuffixOf`
-       ("stuff" :: Named Secure "CR244"))
-      `shouldBe` False
-
-    it "CR245 rejects an too-long suffix Secure" $
-      (("stuffing" :: Named Secure "CR245")
-       `isSuffixOf` ("stuff" :: Named Secure "CR245"))
-      `shouldBe` False
-
-    it "CR246 accepts a case mismatch UTF8" $
-      (("STUFF" :: Named Secure "CR246")
-       `isSuffixOf`
-       ("stuff" :: Named Secure "CR246"))
-      `shouldBe` False
+    -- it "CR240 can check a null suffix of a null Secure" $
+    --   (("" :: Named Secure "CR240")
+    --    `isSuffixOfName`
+    --    ("" :: Named Secure "CR240")) `shouldBe` True
 
     -----------------------------
+    -- n.b. These would cause a type error because NameUtilities are not defined
+    -- for HTMLStyle.
 
-    it "CR250 can check a null suffix of a null HTMLStyle" $
-      (("" :: Named HTMLStyle "CR250")
-       `isSuffixOf`
-       ("" :: Named HTMLStyle "CR250")) `shouldBe` True
-
-    it "CR251 can check a null suffix HTMLStyle" $
-      (("" :: Named HTMLStyle "CR251")
-       `isSuffixOf`
-       ("stuff" :: Named HTMLStyle "CR251"))
-      `shouldBe` True
-
-    it "CR252 can check a valid suffix HTMLStyle" $
-      (("tuff" :: Named HTMLStyle "CR252")
-       `isSuffixOf`
-       ("Stuff" :: Named HTMLStyle "CR252"))
-      `shouldBe` True
-
-    it "CR253 can check a long multi-word suffix HTMLStyle" $
-      (("a\n\t \"Suffix'>>" :: Named HTMLStyle "CR253")
-       `isSuffixOf`
-       ("This & that is <a\n\t \"Suffix'>>" :: Named HTMLStyle "CR253"))
-      `shouldBe` True
-
-    it "CR254 rejects an invalid suffix HTMLStyle" $
-      (("bad" :: Named HTMLStyle "CR254")
-       `isSuffixOf`
-       ("stuff" :: Named HTMLStyle "CR254"))
-      `shouldBe` False
-
-    it "CR255 rejects an too-long suffix HTMLStyle" $
-      (("stuffing" :: Named HTMLStyle "CR255")
-       `isSuffixOf` ("stuff" :: Named HTMLStyle "CR255"))
-      `shouldBe` False
-
-    it "CR256 accepts a case mismatch UTF8" $
-      (("STUFF" :: Named HTMLStyle "CR256")
-       `isSuffixOf`
-       ("stuff" :: Named HTMLStyle "CR256"))
-      `shouldBe` False
+    -- it "CR250 can check a null suffix of a null HTMLStyle" $
+    --   (("" :: Named HTMLStyle "CR250")
+    --    `isSuffixOfName`
+    --    ("" :: Named HTMLStyle "CR250")) `shouldBe` True
 
   describe "Name infix check" $ do
 
     it "CR310 can check a null infix of a null UTF8" $
-      (("" :: Name "CR310") `isInfixOf` ("" :: Name "CR310")) `shouldBe` True
+      (("" :: Name "CR310") `isInfixOfName` ("" :: Name "CR310")) `shouldBe` True
 
     it "CR311 can check a null infix UTF8" $
-      (("" :: Name "CR311") `isInfixOf` ("stuff" :: Name "CR311"))
+      (("" :: Name "CR311") `isInfixOfName` ("stuff" :: Name "CR311"))
       `shouldBe` True
 
     it "CR312 can check a valid ending infix UTF8" $
-      (("uff" :: Name "CR312") `isInfixOf` ("stuff" :: Name "CR312"))
+      (("uff" :: Name "CR312") `isInfixOfName` ("stuff" :: Name "CR312"))
       `shouldBe` True
 
     it "CR313 can check a long multi-word infix UTF8" $
       (("!" :: Name "CR313")
-       `isInfixOf`
+       `isInfixOfName`
        ("This is a\n\t infix!" :: Name "CR313")) `shouldBe` True
 
     it "CR314 rejects an invalid infix UTF8" $
-      (("bad" :: Name "CR314") `isInfixOf` ("stuff" :: Name "CR314"))
+      (("bad" :: Name "CR314") `isInfixOfName` ("stuff" :: Name "CR314"))
       `shouldBe` False
 
     it "CR315 rejects an too-long infix UTF8" $
-      (("stuffing" :: Name "CR315") `isInfixOf` ("stuff" :: Name "CR315"))
+      (("stuffing" :: Name "CR315") `isInfixOfName` ("stuff" :: Name "CR315"))
       `shouldBe` False
 
     it "CR316 rejects an case mismatch UTF8" $
-      (("STUFF" :: Name "CR316") `isInfixOf` ("stuff" :: Name "CR316"))
+      (("STUFF" :: Name "CR316") `isInfixOfName` ("stuff" :: Name "CR316"))
       `shouldBe` False
 
     it "CR317 can check a valid internal infix UTF8" $
-      (("tuf" :: Name "CR312") `isInfixOf` ("stuff" :: Name "CR312"))
+      (("tuf" :: Name "CR312") `isInfixOfName` ("stuff" :: Name "CR312"))
       `shouldBe` True
 
     it "CR318 can check a valid starting infix UTF8" $
-      (("st" :: Name "CR318") `isInfixOf` ("stuff" :: Name "CR318"))
+      (("st" :: Name "CR318") `isInfixOfName` ("stuff" :: Name "CR318"))
       `shouldBe` True
 
     it "CR319 can check a valid equality is an infix UTF8" $
-      (("stuff" :: Name "CR319") `isInfixOf` ("stuff" :: Name "CR319"))
+      (("stuff" :: Name "CR319") `isInfixOfName` ("stuff" :: Name "CR319"))
       `shouldBe` True
 
     -----------------------------
 
     it "CR320 can check a null infix of a null CaseInsensitive" $
       (("" :: Named CaseInsensitive "CR320")
-       `isInfixOf`
+       `isInfixOfName`
        ("" :: Named CaseInsensitive "CR320")) `shouldBe` True
 
     it "CR321 can check a null infix CaseInsensitive" $
       (("" :: Named CaseInsensitive "CR321")
-       `isInfixOf`
+       `isInfixOfName`
        ("stuff" :: Named CaseInsensitive "CR321"))
       `shouldBe` True
 
     it "CR322 can check a valid infix CaseInsensitive" $
       (("Uff" :: Named CaseInsensitive "CR322")
-       `isInfixOf`
+       `isInfixOfName`
        ("Stuff" :: Named CaseInsensitive "CR322"))
       `shouldBe` True
 
     it "CR323 can check a long multi-word infix CaseInsensitive" $
       (("s A\n\t i" :: Named CaseInsensitive "CR323")
-       `isInfixOf`
+       `isInfixOfName`
        ("This is a\n\t Infix!" :: Named CaseInsensitive "CR323"))
       `shouldBe` True
 
     it "CR324 rejects an invalid infix CaseInsensitive" $
       (("bad" :: Named CaseInsensitive "CR324")
-       `isInfixOf`
+       `isInfixOfName`
        ("stuff" :: Named CaseInsensitive "CR324"))
       `shouldBe` False
 
     it "CR325 rejects an too-long infix CaseInsensitive" $
       (("stuffing" :: Named CaseInsensitive "CR325")
-       `isInfixOf` ("stuff" :: Named CaseInsensitive "CR325"))
+       `isInfixOfName` ("stuff" :: Named CaseInsensitive "CR325"))
       `shouldBe` False
 
     it "CR326 accepts a case mismatch UTF8" $
       (("STUFF" :: Named CaseInsensitive "CR326")
-       `isInfixOf`
+       `isInfixOfName`
        ("stuff" :: Named CaseInsensitive "CR326"))
       `shouldBe` True
 
@@ -1145,149 +1013,385 @@ testUtilities = testSpec "Named utilities" $ do
 
     it "CR330 can check a null infix of a null CaseInsensitivePreserve" $
       (("" :: Named CaseInsensitivePreserve "CR330")
-       `isInfixOf`
+       `isInfixOfName`
        ("" :: Named CaseInsensitivePreserve "CR330")) `shouldBe` True
 
     it "CR331 can check a null infix CaseInsensitivePreserve" $
       (("" :: Named CaseInsensitivePreserve "CR331")
-       `isInfixOf`
+       `isInfixOfName`
        ("stuff" :: Named CaseInsensitivePreserve "CR331"))
       `shouldBe` True
 
     it "CR332 can check a valid infix CaseInsensitivePreserve" $
       (("uFf" :: Named CaseInsensitivePreserve "CR332")
-       `isInfixOf`
+       `isInfixOfName`
        ("Stuff" :: Named CaseInsensitivePreserve "CR332"))
       `shouldBe` True
 
     it "CR333 can check a long multi-word infix CaseInsensitivePreserve" $
       ((" A\n\t inf" :: Named CaseInsensitivePreserve "CR333")
-       `isInfixOf`
+       `isInfixOfName`
        ("This is a\n\t Infix!" :: Named CaseInsensitivePreserve "CR333"))
       `shouldBe` True
 
     it "CR334 rejects an invalid infix CaseInsensitivePreserve" $
       (("bad" :: Named CaseInsensitivePreserve "CR334")
-       `isInfixOf`
+       `isInfixOfName`
        ("stuff" :: Named CaseInsensitivePreserve "CR334"))
       `shouldBe` False
 
     it "CR335 rejects an too-long infix CaseInsensitivePreserve" $
       (("stuffing" :: Named CaseInsensitivePreserve "CR335")
-       `isInfixOf` ("stuff" :: Named CaseInsensitivePreserve "CR335"))
+       `isInfixOfName` ("stuff" :: Named CaseInsensitivePreserve "CR335"))
       `shouldBe` False
 
     it "CR336 accepts a case mismatch UTF8" $
       (("STUFF" :: Named CaseInsensitivePreserve "CR336")
-       `isInfixOf`
+       `isInfixOfName`
        ("stuff" :: Named CaseInsensitivePreserve "CR336"))
       `shouldBe` True
 
     -----------------------------
+    -- n.b. These would cause a type error because NameUtilities are not defined
+    -- for Secure..
 
-    it "CR340 can check a null infix of a null Secure" $
-      (("" :: Named Secure "CR340")
-       `isInfixOf`
-       ("" :: Named Secure "CR340")) `shouldBe` True
+    -- it "CR340 can check a null infix of a null Secure" $
+    --   (("" :: Named Secure "CR340")
+    --    `isInfixOfName`
+    --    ("" :: Named Secure "CR340")) `shouldBe` True
 
-    it "CR341 can check a null infix Secure" $
-      (("" :: Named Secure "CR341")
-       `isInfixOf`
-       ("stuff" :: Named Secure "CR341"))
-      `shouldBe` True
-
-    it "CR342 can check a valid infix Secure" $
-      (("f" :: Named Secure "CR342")
-       `isInfixOf`
-       ("Stuff" :: Named Secure "CR342"))
-      `shouldBe` True
-
-    it "CR343 can check a long multi-word infix Secure" $
-      ((" Infix!" :: Named Secure "CR343")
-       `isInfixOf`
-       ("This is a\n\t Infix!" :: Named Secure "CR343"))
-      `shouldBe` True
-
-    it "CR344 rejects an invalid infix Secure" $
-      (("bad" :: Named Secure "CR344")
-       `isInfixOf`
-       ("stuff" :: Named Secure "CR344"))
-      `shouldBe` False
-
-    it "CR345 rejects an too-long infix Secure" $
-      (("stuffing" :: Named Secure "CR345")
-       `isInfixOf` ("stuff" :: Named Secure "CR345"))
-      `shouldBe` False
-
-    it "CR346 accepts a case mismatch UTF8" $
-      (("STUFF" :: Named Secure "CR346")
-       `isInfixOf`
-       ("stuff" :: Named Secure "CR346"))
-      `shouldBe` False
 
     -----------------------------
+    -- n.b. These would cause a type error because NameUtilities are not defined
+    -- for HTMLStyle.
 
-    it "CR350 can check a null infix of a null HTMLStyle" $
-      (("" :: Named HTMLStyle "CR350")
-       `isInfixOf`
-       ("" :: Named HTMLStyle "CR350")) `shouldBe` True
-
-    it "CR351 can check a null infix HTMLStyle" $
-      (("" :: Named HTMLStyle "CR351")
-       `isInfixOf`
-       ("stuff" :: Named HTMLStyle "CR351"))
-      `shouldBe` True
-
-    it "CR352 can check a valid infix HTMLStyle" $
-      (("tuff" :: Named HTMLStyle "CR352")
-       `isInfixOf`
-       ("Stuff" :: Named HTMLStyle "CR352"))
-      `shouldBe` True
-
-    it "CR353 can check a long multi-word infix HTMLStyle" $
-      (("'" :: Named HTMLStyle "CR353")
-       `isInfixOf`
-       ("This & that is <a\n\t \"Infix'>>" :: Named HTMLStyle "CR353"))
-      `shouldBe` True
-
-    it "CR354 rejects an invalid infix HTMLStyle" $
-      (("bad" :: Named HTMLStyle "CR354")
-       `isInfixOf`
-       ("stuff" :: Named HTMLStyle "CR354"))
-      `shouldBe` False
-
-    it "CR355 rejects an too-long infix HTMLStyle" $
-      (("stuffing" :: Named HTMLStyle "CR355")
-       `isInfixOf` ("stuff" :: Named HTMLStyle "CR355"))
-      `shouldBe` False
-
-    it "CR356 accepts a case mismatch UTF8" $
-      (("STUFF" :: Named HTMLStyle "CR356")
-       `isInfixOf`
-       ("stuff" :: Named HTMLStyle "CR356"))
-      `shouldBe` False
+    -- it "CR350 can check a null infix of a null HTMLStyle" $
+    --   (("" :: Named HTMLStyle "CR350")
+    --    `isInfixOfName`
+    --    ("" :: Named HTMLStyle "CR350")) `shouldBe` True
 
   describe "Name take and drop" $ do
 
     let sampleInp = "take and drop" :: Name "t&d"
 
     it "CR360 can take nothing" $ do
-      nameTake 0 sampleInp `shouldBe` fromText ""
+      takeName 0 sampleInp `shouldBe` fromText ""
 
     it "CR361 can take everything" $ do
-      nameTake (nameLength sampleInp) sampleInp `shouldBe` sampleInp
+      takeName (nameLength sampleInp) sampleInp `shouldBe` sampleInp
 
     it "CR362 can take some" $ do
-      nameTake 3 sampleInp `shouldBe` "tak"
+      takeName 3 sampleInp `shouldBe` "tak"
 
     it "CR370 can drop nothing" $ do
-      nameDrop 0 sampleInp `shouldBe` sampleInp
+      dropName 0 sampleInp `shouldBe` sampleInp
 
     it "CR371 can drop everything" $ do
-      nameDrop (nameLength sampleInp) sampleInp `shouldBe` fromText ""
+      dropName (nameLength sampleInp) sampleInp `shouldBe` fromText ""
 
     it "CR372 can drop some" $ do
-      nameDrop 3 sampleInp `shouldBe` fromText "e and drop"
+      dropName 3 sampleInp `shouldBe` fromText "e and drop"
+
+    it "CR373 can drop while nothing" $ do
+      dropNameWhile (const False) sampleInp `shouldBe` sampleInp
+
+    it "CR374 can drop while everything" $ do
+      dropNameWhile (const True) sampleInp `shouldBe` ""
+
+    it "CR375 can drop while some" $ do
+      dropNameWhile (/= ' ') sampleInp `shouldBe` fromText " and drop"
+
+    it "CR376 can drop while end nothing" $ do
+      dropNameWhileEnd (const False) sampleInp `shouldBe` sampleInp
+
+    it "CR377 can drop while end everything" $ do
+      dropNameWhileEnd (const True) sampleInp `shouldBe` ""
+
+    it "CR378 can drop while end some" $ do
+      dropNameWhileEnd (/= ' ') sampleInp `shouldBe` fromText "take and "
+
+    --------------------
+
+    let sAmPLeInp = "TaKe aNd drOp" :: Named CaseInsensitive "t&d"
+
+    it "CR380 can take nothing" $ do
+      takeName 0 sAmPLeInp `shouldBe` fromText ""
+
+    it "CR381 can take everything" $ do
+      takeName (nameLength sAmPLeInp) sAmPLeInp `shouldBe` sAmPLeInp
+
+    it "CR382 can take some" $ do
+      takeName 3 sAmPLeInp `shouldBe` "taK"
+
+    it "CR390 can drop nothing" $ do
+      dropName 0 sAmPLeInp `shouldBe` sAmPLeInp
+
+    it "CR391 can drop everything" $ do
+      dropName (nameLength sAmPLeInp) sAmPLeInp `shouldBe` fromText ""
+
+    it "CR392 can drop some" $ do
+      dropName 3 sAmPLeInp `shouldBe` fromText "e AND DROP"
+
+    it "CR393 can drop while nothing" $ do
+      dropNameWhile (const False) sAmPLeInp `shouldBe` sAmPLeInp
+
+    it "CR394 can drop while everything" $ do
+      dropNameWhile (const True) sAmPLeInp `shouldBe` ""
+
+    it "CR395 can drop while some" $ do
+      dropNameWhile (/= ' ') sAmPLeInp `shouldBe` fromText " AND drop"
+
+    it "CR396 can drop while end nothing" $ do
+      dropNameWhileEnd (const False) sAmPLeInp `shouldBe` sAmPLeInp
+
+    it "CR397 can drop while end everything" $ do
+      dropNameWhileEnd (const True) sAmPLeInp `shouldBe` ""
+
+    it "CR398 can drop while end some" $ do
+      dropNameWhileEnd (/= ' ') sAmPLeInp `shouldBe` fromText "Take AND "
+
+    --------------------
+
+    let sAMPLEInp = "TaKe aNd drOp" :: Named CaseInsensitivePreserve "t&d"
+
+    it "CR400 can take nothing" $ do
+      takeName 0 sAMPLEInp `shouldBe` fromText ""
+
+    it "CR401 can take everything" $ do
+      takeName (nameLength sAMPLEInp) sAMPLEInp `shouldBe` sAMPLEInp
+
+    it "CR402 can take some" $ do
+      takeName 3 sAMPLEInp `shouldBe` "taK"
+
+    it "CR403 can drop nothing" $ do
+      dropName 0 sAMPLEInp `shouldBe` sAMPLEInp
+
+    it "CR404 can drop everything" $ do
+      dropName (nameLength sAMPLEInp) sAMPLEInp `shouldBe` fromText ""
+
+    it "CR405 can drop some" $ do
+      dropName 3 sAMPLEInp `shouldBe` fromText "e AND DROP"
+
+    it "CR406 can drop while nothing" $ do
+      dropNameWhile (const False) sAMPLEInp `shouldBe` sAMPLEInp
+
+    it "CR407 can drop while everything" $ do
+      dropNameWhile (const True) sAMPLEInp `shouldBe` ""
+
+    it "CR408 can drop while some" $ do
+      dropNameWhile (/= ' ') sAMPLEInp `shouldBe` fromText " AND drop"
+
+    it "CR409 can drop while end nothing" $ do
+      dropNameWhileEnd (const False) sAMPLEInp `shouldBe` sAMPLEInp
+
+    it "CR409a can drop while end everything" $ do
+      dropNameWhileEnd (const True) sAMPLEInp `shouldBe` ""
+
+    it "CR409b can drop while end some" $ do
+      dropNameWhileEnd (/= ' ') sAMPLEInp `shouldBe` fromText "Take AND "
+
+    --------------------
+    -- n.b. These would cause a type error because NameUtilities are not
+    -- supported for Secure because that would leak the Secure name:
+
+    -- it "CR363 cannot take from secure" $ do
+    --   takeName 0 ("hidden" :: Named Secure "CR363")
+    --     `shouldBe`
+    --     ("disallowed" :: Named Secure "CR363")
+
+    -- it "CR373 can drop from secure" $ do
+    --   dropName 0 ("hidden" :: Named Secure "CR363")
+    --     `shouldBe`
+    --     ("disallowed" :: Named Secure "CR363")
+
+  describe "Name breaking check" $ do
+
+    it "CR410 can check a null breakOn of a null UTF8" $
+      (("" :: Name "CR410") `breakOnName` ("" :: Name "CR410"))
+      `shouldBe` ("", "")
+
+    it "CR411 can check a null infix UTF8" $
+      (("" :: Name "CR411") `breakOnName` ("stuff" :: Name "CR411"))
+      `shouldBe` ("stuff", "")
+
+    it "CR412 can check a valid ending infix UTF8" $
+      (("uff" :: Name "CR412") `breakOnName` ("stuff" :: Name "CR412"))
+      `shouldBe` ("st", "uff")
+
+    it "CR413 can check a long multi-word infix UTF8" $
+      (("!" :: Name "CR413")
+       `breakOnName`
+       ("This is a\n\t infix!" :: Name "CR413"))
+      `shouldBe`
+      ("This is a\n\t infix", "!")
+
+    it "CR414 rejects an invalid infix UTF8" $
+      (("bad" :: Name "CR414") `breakOnName` ("stuff" :: Name "CR414"))
+      `shouldBe`
+      ("stuff", "")
+
+    it "CR415 rejects an too-long infix UTF8" $
+      (("stuffing" :: Name "CR415") `breakOnName` ("stuff" :: Name "CR415"))
+      `shouldBe`
+      ("stuff", "")
+
+    it "CR416 rejects an case mismatch UTF8" $
+      (("STUFF" :: Name "CR416") `breakOnName` ("stuff" :: Name "CR416"))
+      `shouldBe`
+      ("stuff", "")
+
+    it "CR417 can check a valid internal infix UTF8" $
+      (("tuf" :: Name "CR412") `breakOnName` ("stuff" :: Name "CR412"))
+      `shouldBe`
+      ("s", "tuff")
+
+    it "CR418 can check a valid starting infix UTF8" $
+      (("st" :: Name "CR418") `breakOnName` ("stuff" :: Name "CR418"))
+      `shouldBe`
+      ("", "stuff")
+
+    it "CR419 can check a valid equality is an infix UTF8" $
+      (("stuff" :: Name "CR419") `breakOnName` ("stuff" :: Name "CR419"))
+      `shouldBe`
+      ("", "stuff")
+
+    it "CR419a can break nothing" $ do
+      breakName (const False) ("some stuff" :: Name "CR419a")
+        `shouldBe`
+         ("some stuff" :: Name "CR419a", "")
+
+    it "CR419b can break everything" $ do
+      breakName (const True) ("some stuff" :: Name "CR419b")
+        `shouldBe` ("", "some stuff")
+
+    it "CR419c can break some" $ do
+      breakName (== ' ') ("some stuff" :: Name "CR419b")
+        `shouldBe` (fromText "some", " stuff")
+
+    --------------------
+
+    it "CR420 can check a null breakOn of a null CaseInsensitive" $
+      (("" :: Named CaseInsensitive "CR420")
+       `breakOnName`
+       ("" :: Named CaseInsensitive "CR420"))
+      `shouldBe` ("", "")
+
+    it "CR421 can check a null infix CaseInsensitive" $
+      (("" :: Named CaseInsensitive "CR421")
+       `breakOnName`
+       ("stuff" :: Named CaseInsensitive "CR421"))
+      `shouldBe` ("stuff", "")
+
+    it "CR422 can check a valid ending infix CaseInsensitive" $
+      (("Uff" :: Named CaseInsensitive "CR422")
+       `breakOnName`
+       ("Stuff" :: Named CaseInsensitive "CR422"))
+      `shouldBe` ("st", "uff")
+
+    it "CR423 can check a long multi-word infix CaseInsensitive" $
+      (("!" :: Named CaseInsensitive "CR423")
+       `breakOnName`
+       ("This is A\n\t infix!" :: Named CaseInsensitive "CR423"))
+      `shouldBe`
+      ("This is a\n\t INFIX", "!")
+
+    it "CR424 rejects an invalid infix CaseInsensitive" $
+      (("bad" :: Named CaseInsensitive "CR424")
+       `breakOnName`
+       ("stuff" :: Named CaseInsensitive "CR424"))
+      `shouldBe`
+      ("stuff", "")
+
+    it "CR425 rejects an too-long infix CaseInsensitive" $
+      (("stuffing" :: Named CaseInsensitive "CR425")
+       `breakOnName`
+       ("stuff" :: Named CaseInsensitive "CR425"))
+      `shouldBe`
+      ("stuff", "")
+
+    it "CR426 accepts a case mismatch CaseInsensitive" $
+      (("STUFF" :: Named CaseInsensitive "CR426")
+       `breakOnName`
+       ("stuff" :: Named CaseInsensitive "CR426"))
+      `shouldBe`
+      ("", "stuff")
+
+    it "CR427 can check a valid internal infix CaseInsensitive" $
+      (("tUf" :: Named CaseInsensitive "CR422")
+       `breakOnName`
+       ("STUFf" :: Named CaseInsensitive "CR422"))
+      `shouldBe`
+      ("s", "Tuff")
+
+    it "CR428 can check a valid starting infix CaseInsensitive" $
+      (("st" :: Named CaseInsensitive "CR428")
+       `breakOnName`
+       ("STUFF" :: Named CaseInsensitive "CR428"))
+      `shouldBe`
+      ("", "stUFf")
+
+    --------------------
+
+    it "CR430 can check a null breakOn of a null CaseInsensitivePreserve" $
+      (("" :: Named CaseInsensitivePreserve "CR430")
+       `breakOnName`
+       ("" :: Named CaseInsensitivePreserve "CR430"))
+      `shouldBe` ("", "")
+
+    it "CR431 can check a null infix CaseInsensitivePreserve" $
+      (("" :: Named CaseInsensitivePreserve "CR431")
+       `breakOnName`
+       ("stuff" :: Named CaseInsensitivePreserve "CR431"))
+      `shouldBe` ("stuff", "")
+
+    it "CR432 can check a valid ending infix CaseInsensitivePreserve" $
+      (("Uff" :: Named CaseInsensitivePreserve "CR432")
+       `breakOnName`
+       ("Stuff" :: Named CaseInsensitivePreserve "CR432"))
+      `shouldBe` ("st", "uff")
+
+    it "CR433 can check a long multi-word infix CaseInsensitivePreserve" $
+      (("!" :: Named CaseInsensitivePreserve "CR433")
+       `breakOnName`
+       ("This is A\n\t infix!" :: Named CaseInsensitivePreserve "CR433"))
+      `shouldBe`
+      ("This is a\n\t INFIX", "!")
+
+    it "CR434 rejects an invalid infix CaseInsensitivePreserve" $
+      (("bad" :: Named CaseInsensitivePreserve "CR434")
+       `breakOnName`
+       ("stuff" :: Named CaseInsensitivePreserve "CR434"))
+      `shouldBe`
+      ("stuff", "")
+
+    it "CR435 rejects an too-long infix CaseInsensitivePreserve" $
+      (("stuffing" :: Named CaseInsensitivePreserve "CR435")
+       `breakOnName`
+       ("stuff" :: Named CaseInsensitivePreserve "CR435"))
+      `shouldBe`
+      ("stuff", "")
+
+    it "CR436 accepts a case mismatch CaseInsensitivePreserve" $
+      (("STUFF" :: Named CaseInsensitivePreserve "CR436")
+       `breakOnName`
+       ("stuff" :: Named CaseInsensitivePreserve "CR436"))
+      `shouldBe`
+      ("", "stuff")
+
+    it "CR437 can check a valid internal infix CaseInsensitivePreserve" $
+      (("tUf" :: Named CaseInsensitivePreserve "CR432")
+       `breakOnName`
+       ("STUFf" :: Named CaseInsensitivePreserve "CR432"))
+      `shouldBe`
+      ("s", "Tuff")
+
+    it "CR438 can check a valid starting infix CaseInsensitivePreserve" $
+      (("st" :: Named CaseInsensitivePreserve "CR438")
+       `breakOnName`
+       ("STUFF" :: Named CaseInsensitivePreserve "CR438"))
+      `shouldBe`
+      ("", "stUFf")
+
 
 ----------------------------------------------------------------------
 -- Data.Name.JSON

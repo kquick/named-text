@@ -1,10 +1,25 @@
 # Revision history for named-text
 
-## 1.2.5.0 -- 2026-08-22
+## 1.2.5.0 -- 2026-08-23
 
-* Added `isPrefixOf`, `isSuffixOf`, and `isInfixOf`.
-* Added `nameTake` and `nameDrop`, which function similarly to `Text.take` and
-  `Text.drop`.
+* Added `NameUtilities` class, which defines the following methods:
+
+  - `dropName`
+  - `dropNameWhile`
+  - `dropNameWhileEnd`
+  - `takeName`
+  - `breakName`
+  - `breakOnName`
+  - `isPrefixOfName`
+  - `isSuffixOfName`
+  - `isInfixOfName`
+  - `unconsName`
+
+  There are instances of the above (which function similarly to their `Data.Text`
+  equivalents) for many--but not all--Name Styles.  Notably there are no
+  instances for `Secure` style names because that would allow leakage of the
+  secure name, nor for `HTMLStyle` or `JSONStyle` names due to the risk of
+  corrupted results due to the structured contents of those styles.
 * Updated `CaseInsensitivePreserve` implementation internally to use `toCaseFold`
   instead of `toCaseLower` for various operations.  This should have no impact
   but _may_ change the behavior of `Eq`, `Ord`, or `Hashable` operations.*

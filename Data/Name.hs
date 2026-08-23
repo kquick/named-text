@@ -159,14 +159,22 @@ module Data.Name
     -- * Utility operations
   , nameLength
   , nullName
-  , nameDrop
-  , nameTake
-  , isPrefixOf
-  , isSuffixOf
-  , isInfixOf
+  , NameUtilities
+  , dropName
+  , dropNameWhile
+  , dropNameWhileEnd
+  , takeName
+  , breakName
+  , breakOnName
+  , isPrefixOfName
+  , isSuffixOfName
+  , isInfixOfName
+  , unconsName
 )
 where
 
+import           Control.Applicative ( (<|>) )
+import           Data.Bifunctor ( bimap )
 import           Data.Bool ( bool )
 import           Data.Function ( on )
 import           Data.Hashable ( Hashable, hash )
@@ -316,50 +324,125 @@ instance  {-# OVERLAPPABLE #-} ( KnownSymbol ty
 ----------------------------------------------------------------------
 -- Utility operations
 
--- | Returns the length of the underlying 'Data.Text'
+-- | _O(n)_ Returns the length of the underlying 'Data.Text'
 
 nameLength :: Named style nm -> Natural
 nameLength = toEnum . T.length . named
 
--- | Returns true if the name value is empty.
+-- | _O(1)_ Returns true if the name value is empty.
 
 nullName :: Named style nm -> Bool
 nullName = T.null . named
 
-nameDrop :: Natural -> Named style nm -> Named style nm
-nameDrop cnt = Named . T.drop (fromEnum cnt) . named
+-- | Defines a class of various utility functions that will allow working with a
+-- Name.  This is defined as a class rather than discrete functions to allow each
+-- class to refine these if necessary; in particular, the Secure style of Name
+-- will disallow all of these because they could leak the Secure information.
 
-nameTake :: Natural -> Named style nm -> Named style nm
-nameTake cnt = Named . T.take (fromEnum cnt) . named
+class NameUtilities style nm where
 
-isPrefixOf, isSuffixOf, isInfixOf :: Eq (Named sty nameOf)
-                                  => Named sty nameOf -> Named sty nameOf
-                                  -> Bool
+  -- Note that the default instances here are carefully constructed in order to
+  -- use the Eq functionality of the corresponding Name, rather than relying
+  -- solely on Text Eq instances.  Thus, they frequently use a more detailed
+  -- algorithm than simply calling the corresponding Data.Text operation on the
+  -- Name's contents.
 
--- | O(n) Returns true if the first name is a prefix of the second.
-isPrefixOf pfx full =
-  pfx == (Named $ T.take (fromEnum $ nameLength pfx) $ named full)
+  -- | _O(n)_ Drops the specified number of characters from the front of the
+  -- name.  If more characters are dropped than exist in the name, the resulting
+  -- name is a null Name.
+  dropName :: Natural -> Named style nm -> Named style nm
+  dropName cnt = Named . T.drop (fromEnum cnt) . named
 
--- | O(n) Returns true if the first name is a suffix of the second.
-isSuffixOf sfx full =
-  let fL = nameLength full
-      sL = nameLength sfx
-  in case T.compareLength (named sfx) (fromEnum fL) of
-       GT -> False  -- suffix is longer than target name
-       _ -> sfx == (Named $ T.drop (fromEnum $ fL - sL) $ named full)
+  -- | _O(n)_ Takes the specified number of characters from the front of the
+  -- name.  If more characters are requested than exist in the name, the original
+  -- name is returned.
+  takeName :: Natural -> Named style nm -> Named style nm
+  takeName cnt = Named . T.take (fromEnum cnt) . named
 
--- | O(n) Returns true if the first name is contained in the second.
-isInfixOf ifx full =
-  let fL = nameLength full
-      ifL = nameLength ifx
-      checkAt x = flip bool True
-                  $ ifx == (Named
-                            $ T.take (fromEnum ifL)
-                            $ T.drop (fromEnum x)
-                            $ named full)
-  in case T.compareLength (named ifx) (fromEnum fL) of
-       GT -> False -- infix is longer than target name
-       _ -> foldr checkAt False [0 .. fL - ifL ]
+  -- | _O(n)_ Drops the start of the Name while the specified condition holds
+  -- true.  Be aware that when using some styles like CaseInsensitivePreserved,
+  -- the supplied predicate is responsible for preserving the desired behavior.
+  dropNameWhile :: (Char -> Bool) -> Named style nm -> Named style nm
+  dropNameWhile p = Named . T.dropWhile p . named
+
+  -- | _O(n)_ Drops the end of the Name while the specified condition holds True.
+  -- Be aware that when using some styles like CaseInsensitivePreserved, the
+  -- supplied predicate is responsible for preserving the desired behavior.
+  dropNameWhileEnd :: (Char -> Bool) -> Named style nm -> Named style nm
+  dropNameWhileEnd p = Named . T.dropWhileEnd p . named
+
+  -- | _O(n)_ Returns a pair whose first element is the portion of the Name for
+  -- which the supplied predicate returned False, and the second element is the
+  -- remaining portion of the input Name.  Be aware that when using some styles
+  -- like CaseInsensitivePreserved, the supplied predicate is responsible for
+  -- preserving the desired behavior.
+  breakName :: (Char -> Bool) -> Named style nm
+            -> ( Named style nm, Named style nm )
+  breakName p = bimap Named Named . T.break p . named
+
+  -- | _O(n+m)_ Finds the first instance of the first Name in the second Name and
+  -- returns a tuple that splits the second name at the place where the first
+  -- Name was found (thus the second element will start with the first Name).
+  --
+  -- If the first Name does not exist in the second Name, the second element of
+  -- the tuple will be a null Name.
+  --
+  -- If the first name is a null Name, it will never be found in the second Name
+  -- and the result will be a "not found" (the return tuple's first element will
+  -- be the second input, and the second element will be a null name).  This
+  -- behavior is different than the Data.Text.breakOn, which will throw an error
+  -- exception if the first input is null.
+  breakOnName :: Eq (Named style nm)
+              => Named style nm -> Named style nm
+              -> (Named style nm, Named style nm)
+  breakOnName what full =
+    let whatL = nameLength what
+        fullL = nameLength full
+        checkAt n =
+          let r = dropName n full
+          in (<|> (bool Nothing (Just (takeName n full, r))
+                   $ what == takeName whatL r
+                  ))
+
+    in case T.compareLength (named what) (fromEnum fullL) of
+         GT -> (full, Named "")
+         EQ -> bool (full, "") ("", full) $ what == full
+         LT -> maybe (full, "") id $ foldr checkAt Nothing [0 .. fullL - whatL]
+
+  -- | _O(n)_ Returns true if the first name is a prefix of the second.
+  isPrefixOfName :: Eq (Named style nm)
+                 => Named style nm -> Named style nm -> Bool
+  isPrefixOfName pfx full =
+    pfx == (Named $ T.take (fromEnum $ nameLength pfx) $ named full)
+
+  -- | _O(n)_ Returns true if the first name is a suffix of the second.
+  isSuffixOfName :: Eq (Named style nm)
+                 => Named style nm -> Named style nm -> Bool
+  isSuffixOfName sfx full =
+    let fL = nameLength full
+        sL = nameLength sfx
+    in case T.compareLength (named sfx) (fromEnum fL) of
+         GT -> False  -- suffix is longer than target name
+         _ -> sfx == (Named $ T.drop (fromEnum $ fL - sL) $ named full)
+
+  -- | _O(n)_ Returns true if the first name is contained in the second.
+  isInfixOfName :: Eq (Named style nm)
+                => Named style nm -> Named style nm -> Bool
+  isInfixOfName ifx full =
+    let fL = nameLength full
+        ifL = nameLength ifx
+        checkAt x = flip bool True
+                    $ ifx == (takeName ifL $ dropName x full)
+    in case T.compareLength (named ifx) (fromEnum fL) of
+         GT -> False -- infix is longer than target name
+         _ -> foldr checkAt False [0 .. fL - ifL ]
+
+  -- | _O(1)_ Returns nothing if the input Name is null, otherwise returns the
+  -- first character of the Name and the remaining Name.  Note that the
+  -- style-appropriate handling of the returned character is the responsibility
+  -- of the caller.
+  unconsName :: Named style nm -> Maybe (Char, Named style nm)
+  unconsName = fmap (fmap Named) . T.uncons . named
 
 
 ----------------------------------------------------------------------
@@ -428,6 +511,8 @@ deriving instance Eq (Named UTF8 nameOf)
 deriving instance Ord (Named UTF8 nameOf)
 deriving instance Hashable (Named UTF8 nameOf)
 
+instance NameUtilities UTF8 nm
+
 
 ----------------------------------------------------------------------
 -- * CaseInsensitive Named objects
@@ -467,6 +552,8 @@ instance ConvertNameStyle UTF8 CaseInsensitive nameTy
 deriving instance Eq (Named CaseInsensitive nameOf)
 deriving instance Ord (Named CaseInsensitive nameOf)
 deriving instance Hashable (Named CaseInsensitive nameOf)
+
+instance NameUtilities CaseInsensitive nm
 
 ----------------------------------------------------------------------
 -- * CaseInsensitivePreserve Named objects
@@ -510,6 +597,7 @@ instance Ord (Named CaseInsensitivePreserve nameOf) where
 instance Hashable (Named CaseInsensitivePreserve nameOf) where
   hash = hash . T.toCaseFold . nameText
 
+instance NameUtilities CaseInsensitivePreserve nm
 
 ----------------------------------------------------------------------
 -- * Secure Named objects
@@ -561,6 +649,9 @@ instance NameText Secure where
 deriving instance Eq (Named Secure nameOf)
 deriving instance Ord (Named Secure nameOf)
 deriving instance Hashable (Named Secure nameOf)
+
+-- n.b. do NOT define and instance of NameUtilites for the Secure style because
+-- it would leak secure information.
 
 
 ----------------------------------------------------------------------
@@ -629,9 +720,9 @@ deriving instance Eq (Named HTMLStyle nameOf)
 deriving instance Ord (Named HTMLStyle nameOf)
 deriving instance Hashable (Named HTMLStyle nameOf)
 
--- Trigger faults in the code and trace them for impact
-
--- GA has no MB experience, so don't know how much to expect or have any expectations.  Fault triggering and detection would be the principle focus.
+-- Note, NameUtilites are not defined because it is possible that they might
+-- result in invalid HTML (splitting/dropping/taking partial tags or escaped
+-- characters).
 
 ----------------------------------------------------------------------
 -- Constraining allowed names

@@ -22,7 +22,7 @@
   corrupted results due to the structured contents of those styles.
 * Updated `CaseInsensitivePreserve` implementation internally to use `toCaseFold`
   instead of `toCaseLower` for various operations.  This should have no impact
-  but _may_ change the behavior of `Eq`, `Ord`, or `Hashable` operations.*
+  but _may_ change the behavior of `Eq`, `Ord`, or `Hashable` operations.
 * Internal optimizations.
 
 ## 1.2.4.0 -- 2026-07-04

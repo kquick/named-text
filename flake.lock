@@ -25,13 +25,13 @@
       "locked": {
         "lastModified": 1758506353,
         "narHash": "sha256-m4qQXZcHffx1OW1a6JVX3d/XzfSL9cFcTUR+O8yyFYo=",
-        "owner": "stevenfontanella",
+        "owner": "monadfix",
         "repo": "microlens",
         "rev": "7d509d465c54dba45b182f9c60452b3b3aa71d1a",
         "type": "github"
       },
       "original": {
-        "owner": "stevenfontanella",
+        "owner": "monadfix",
         "repo": "microlens",
         "type": "github"
       }

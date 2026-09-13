@@ -10,7 +10,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     microlens-src = {
-      url = "github:stevenfontanella/microlens";
+      url = "github:monadfix/microlens";
       flake = false;
     };
     parameterized-utils-src = {

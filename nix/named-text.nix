@@ -6,7 +6,7 @@
 mkDerivation {
   pname = "named-text";
   version = "1.2.5.0";
-  src = ./.;
+  src = ./..;
   libraryHaskellDepends = [
     aeson base deepseq hashable prettyprinter sayable template-haskell
     text

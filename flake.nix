@@ -37,6 +37,12 @@
             , tasty-checklist
             , sayable }:
     rec {
+
+      apps = levers.eachSystem (s:
+        {
+          depmgr = levers.apps.${s}.depmgr;
+        });
+
       devShells = levers.haskellShells
         { inherit nixpkgs;
           flake = self;

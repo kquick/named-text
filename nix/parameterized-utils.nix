@@ -8,7 +8,7 @@ mkDerivation {
   pname = "parameterized-utils";
   version = "2.3.1.0.99";
   src = fetchgit {
-    url = "https://github.com/GaloisInc/parameterized-utils";
+    url = "https://github.com/galoisinc/parameterized-utils";
     sha256 = "0jrfac6bkh0pppln6chpy16dbfw34djcq58kn0yry0vwf3iyixas";
     rev = "0423981e27499d956ec084e8420b55ac49200c47";
     fetchSubmodules = true;

@@ -1,7 +1,7 @@
 dev
  subcmd
    build
-     Builds the named-text library
+     Builds the project
        exec = cabal build named-text
    test
      testcase

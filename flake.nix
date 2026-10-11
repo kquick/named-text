@@ -60,9 +60,7 @@
           default = named-text;
           microlens = mkHaskell "microlens" "${microlens-src}/microlens" {};
           named-text = mkHaskell "named-text" self {
-            inherit parameterized-utils;
-            inherit sayable;
-            inherit tasty-checklist;
+            inherit parameterized-utils sayable tasty-checklist;
             adjustDrv = levers.haskellUnbounded pkgs ["ghc914"] ["tasty-hspec"];
           };
           parameterized-utils = mkHaskell "parameterized-utils"
